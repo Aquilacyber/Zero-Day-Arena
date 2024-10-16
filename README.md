@@ -55,6 +55,16 @@ To get started with Zero-Day Arena, follow these simple steps:
 3. Run the game: 
    python3 raven.py
 
+
+
+Updating the Game
+
+To update `raven.py` from the GitHub repository, you can use the provided Bash script. Here’s how to do it:
+1. Make the script executable: sudo chmod +x update.sh
+
+
+2. Run the script: ./update.sh
+
 How to Play
 
 1. Main Menu:
@@ -90,3 +100,5 @@ For any inquiries, suggestions, or issues, feel free to contact us:
 - Community [AquilaCyber](https://chat.whatsapp.com/Gq35cpJOuSFEdoZOktx2R8)
 
 Enjoy hacking in Zero-Day Arena! May the best hacker win!
+
+
