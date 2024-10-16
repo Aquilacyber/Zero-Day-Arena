@@ -87,5 +87,6 @@ For any inquiries, suggestions, or issues, feel free to contact us:
 - Twitter: [AquilaCyber](https://twitter.com/AquilaCyber)
 - LinkedIn: [AquilaCyber](https://www.linkedin.com/company/AquilaCyber)
 - GitHub: [AquilaCyber](https://github.com/Aquilacyber)
+- Community [AquilaCyber](https://chat.whatsapp.com/Gq35cpJOuSFEdoZOktx2R8)
 
 Enjoy hacking in Zero-Day Arena! May the best hacker win!
