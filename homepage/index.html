@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AquilaCyber CTF Lab</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    :root {
+      --primary-color: #00ffff;
+      --background-color: #0e0e0e;
+      --card-background: #1a1a1a;
+      --text-color: #f0f0f0;
+      --accent-color: #ff6f61;
+      --font-family: 'Inter', Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-family: var(--font-family);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: var(--background-color);
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+    }
+
+    .narrative {
+      background: var(--card-background);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 960px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--text-color);
+    }
+
+    .getting-started {
+      background: var(--card-background);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 960px;
+      font-size: 1rem;
+      color: var(--text-color);
+    }
+
+    .challenge-info {
+      padding: 20px;
+      background: var(--card-background);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+      margin: 20px auto;
+      width: 90%;
+      max-width: 960px;
+    }
+
+    .challenge-info h2 {
+      color: var(--accent-color);
+      margin-bottom: 16px;
+    }
+
+    .challenge-info .challenge-detail {
+      margin-bottom: 16px;
+    }
+
+    .challenge-info .challenge-detail h3 {
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    .challenge-info .challenge-detail p {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 960px;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: var(--card-background);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-decoration: none;
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 12px 36px rgba(0, 255, 255, 0.6);
+    }
+
+    .card h2 {
+      margin-bottom: 12px;
+      color: var(--accent-color);
+    }
+
+    .card p {
+      flex-grow: 1;
+      margin-bottom: 16px;
+    }
+
+    .card .link {
+      font-weight: 700;
+      color: var(--primary-color);
+      text-align: right;
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔥 AquilaCyber CTF Lab 🔥</h1>
+    <p>Explore the challenges below and test your skills!</p>
+  </header>
+
+  <section class="narrative">
+    <h2>Welcome to the AquilaCyber CTF Lab</h2>
+    <p>Step into the shoes of a cybersecurity expert tasked with uncovering hidden secrets, breaking encryption, and solving complex puzzles. Each challenge is designed to test your skills and immerse you in a thrilling hacking adventure. Are you ready to take on the challenge?</p>
+  </section>
+
+  <section class="getting-started">
+    <h2>Getting Started</h2>
+    <p>To begin, select a challenge below. Each challenge comes with hints and a walkthrough to guide you if you get stuck. Remember, persistence and creativity are key!</p>
+  </section>
+
+  <section class="challenge-info">
+    <h2>Challenge Overview and How to Access Them</h2>
+    <div class="challenge-detail">
+      <h3>1. Web: SQL Injection Challenge</h3>
+      <p>This challenge is a web application intentionally vulnerable to SQL injection attacks. Your goal is to exploit this vulnerability to bypass authentication or extract sensitive data from the database.</p>
+      <p><strong>How to Access:</strong> The challenge runs inside a Docker container on port 5001. Start it by running <code>docker-compose up</code> in the <code>web-sqli</code> directory, then open <a href="http://localhost:5001" target="_blank" rel="noopener noreferrer">http://localhost:5001</a> in your browser.</p>
+    </div>
+    <div class="challenge-detail">
+      <h3>2. Crypto: XOR Challenge</h3>
+      <p>This challenge involves decrypting a message that was encrypted using XOR encryption. Analyze the logic, find the key, and recover the flag. Hints and a riddle are provided in the web app to help you solve it!</p>
+      <p><strong>How to Access:</strong> Solve this challenge directly in your browser at <a href="http://localhost:5002" target="_blank" rel="noopener noreferrer">http://localhost:5002</a>.</p>
+    </div>
+    <div class="challenge-detail">
+      <h3>3. Reverse Engineering: CrackMe</h3>
+      <p>This challenge is a Python script designed for reverse engineering. You need to analyze the script's logic to find the correct input or key that passes the validation and reveals the flag.</p>
+      <p><strong>How to Access:</strong> You can now solve this challenge directly in your browser at <a href="http://localhost:5003" target="_blank" rel="noopener noreferrer">http://localhost:5003</a> (or open the script at <code>../reverse-pyc/crackme.py</code> in a Python environment).</p>
+    </div>
+    <div class="challenge-detail">
+      <h3>4. Forensics: Steganography</h3>
+      <p>This challenge involves hidden data embedded within an image file using steganography techniques. Download the image, extract the flag using any steganography tool, and verify your flag in the web app.</p>
+      <p><strong>How to Access:</strong> Open the challenge in your browser at <a href="http://localhost:5004" target="_blank" rel="noopener noreferrer">http://localhost:5004</a> to download the image and verify your flag.</p>
+    </div>
+  </section>
+
+  <main>
+    <a href="http://localhost:5001" class="card" target="_blank" rel="noopener noreferrer">
+      <h2>Web: SQL Injection Challenge</h2>
+      <p>Test your web hacking skills with this SQL Injection challenge running on localhost:5001.</p>
+      <span class="link">Open Challenge &rarr;</span>
+    </a>
+    <a href="http://localhost:5002" class="card" target="_blank" rel="noopener noreferrer">
+      <h2>Crypto: XOR Challenge</h2>
+      <p>Try to decrypt the XOR-encrypted message in your browser. The challenge is running as a web app on port 5002.</p>
+      <span class="link">Open Challenge &rarr;</span>
+    </a>
+    <a href="http://localhost:5003" class="card" target="_blank" rel="noopener noreferrer">
+      <h2>Reverse Engineering: CrackMe</h2>
+      <p>Try to solve the CrackMe challenge in your browser. The challenge is running as a web app on port 5003.</p>
+      <span class="link">Open Challenge &rarr;</span>
+    </a>
+    <a href="http://localhost:5004" class="card" target="_blank" rel="noopener noreferrer">
+      <h2>Forensics: Steganography</h2>
+      <p>Extract the hidden flag from the image and verify it in your browser. The challenge is running as a web app on port 5004.</p>
+      <span class="link">Open Challenge &rarr;</span>
+    </a>
+  </main>
+
+  <footer>
+    &copy; 2025 AquilaCyber CTF Lab. All rights reserved.
+  </footer>
+</body>
+</html>

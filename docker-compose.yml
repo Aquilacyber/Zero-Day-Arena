@@ -1,0 +1,12 @@
+
+services:
+  web-sqli:
+    build: ./web-sqli
+    ports:
+      - "5001:80"
+  homepage:
+    image: nginx:alpine
+    volumes:
+      - ./homepage:/usr/share/nginx/html:ro
+    ports:
+      - "5000:80"

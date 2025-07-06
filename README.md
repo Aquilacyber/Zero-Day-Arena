@@ -1,104 +1,80 @@
 
-Zero-Day Arena
+# 🦅 AquilaCyber CTF Lab 🦅
 
-Welcome to Zero-Day Arena – the ultimate retro hacker Capture the Flag (CTF) experience! Dive into a world of cybersecurity challenges that simulate real-world penetration testing scenarios while enjoying a nostalgic retro vibe.
+Welcome to the **AquilaCyber CTF Lab** — your all-in-one playground for learning, hacking, and having fun! Step into the shoes of a digital detective, a cryptanalyst, a reverse engineer, and a forensics wizard. Each challenge is crafted to teach, surprise, and entertain. Whether you’re a beginner or a seasoned hacker, you’ll find something to test your skills and spark your curiosity.
 
-Table of Contents
+> **"The best way to learn cybersecurity is to break things — and then fix them!"**
 
-Features
-Raven Recon
-Installation
-How to Play
-Contributing
-License
-Contact
 
-Features
+## 🚩 What’s Inside?
 
-- Real Commands and Tools: Engage with challenges using authentic cybersecurity tools like Wireshark, Metasploit, and Burp Suite.
-- Evolving Difficulty Levels: Start from newbie-friendly tasks and progress to expert-level challenges.
-- Progressive Storyline: Navigate through an immersive narrative that simulates real-life cyber threats.
-- Comprehensive Feedback and Hints: Receive detailed feedback and hints for each completed challenge.
-- Virtual Hosts and Networks: Experience multiple hosts representing different systems and networks.
+You’ll tackle four unique, hands-on challenges:
 
-Raven Recon
+- **Web Security (SQL Injection):** Hack your way past login forms and extract secrets from a vulnerable web app. Learn the art of SQLi in a safe, legal environment.
+- **Cryptography (XOR):** Can you outsmart a classic XOR cipher? Solve riddles, analyze ciphertext, and discover the flag — all in a beautiful web interface.
+- **Reverse Engineering (CrackMe):** Dive into Python bytecode and .pyc files. Reverse engineer the logic, break the obfuscation, and claim your flag!
+- **Forensics (Steganography):** Download a mysterious image, use your favorite stego tools, and reveal the flag hidden in the pixels. No upload needed — just pure analysis.
 
-Raven Recon is one of the key challenges in Zero-Day Arena, featuring:
+Each challenge is web-based, visually modern, and comes with hints and narrative to guide you.
 
-- Immersive Storyline: A compelling narrative that simulates real-life penetration testing scenarios.
-- Real-Life Commands: Solve puzzles using actual penetration testing commands.
-- Safety First: Practice in a secure, simulated lab environment without risks.
-- Progress Tracking: Your progress is saved, allowing you to continue later.
-- Retro Theme: Enjoy a classic retro look, reminiscent of vintage computer games.
 
-Mission Contents
+## 🚀 Getting Started
 
-Raven Recon consists of 100 different hosts, each teaching unique aspects of penetration testing, covering topics such as:
+### Prerequisites
 
-- Information Gathering
-- Exploitation
-- Post-Exploitation
-- Privilege Escalation
-- Client-Side Attacks
-- Web Application Attacks
+Before you begin, make sure you have:
 
-Installation
+- **PHP 7.4+** (for the homepage)
+- **Python 3.x** (for the web challenges)
+- **Docker & Docker Compose** (for the SQLi challenge)
+- **Git** (optional, for cloning)
 
-To get started with Zero-Day Arena, follow these simple steps:
+No need to install extra Python packages — the setup script will handle it for you!
 
-1. Clone the repository:
-   git clone https://github.com/Aquilacyber/Zero-Day-Arena.git
 
-2. Navigate to the Raven Recon directory:
-   cd Zero-Day-Arena/Raven-Recon
+### 🛠️ Setup
 
-3. Run the game: 
-   python3 raven.py
+Clone the repo and run the setup script. It will check dependencies, install what’s missing, and launch everything for you:
+
+```bash
+./setup.sh
+```
 
 
 
-Updating the Game
+### 🌐 Launching the CTF
 
-To update `raven.py` from the GitHub repository, you can use the provided Bash script. Here’s how to do it:
-1. Make the script executable: sudo chmod +x update.sh
+Once setup is complete, open your browser and jump into the action:
 
+- 🏠 **Homepage:** [http://localhost:8000/homepage/index.html](http://localhost:8000/homepage/index.html) — Start here for the story, challenge links, and tips.
+- 🕸️ **Web: SQL Injection:** [http://localhost:5001](http://localhost:5001) — Hack the login and dig into the database.
+- 🔐 **Crypto: XOR Challenge:** [http://localhost:5002](http://localhost:5002) — Decrypt the message, solve the riddle, and claim your flag.
+- 🕵️‍♂️ **Reverse Engineering: CrackMe:** [http://localhost:5003](http://localhost:5003) — Reverse engineer the .pyc logic and break the challenge.
+- 🖼️ **Forensics: Steganography:** [http://localhost:5004](http://localhost:5004) — Download the image, extract the flag, and verify it online.
 
-2. Run the script: ./update.sh
-
-How to Play
-
-1. Main Menu:
-   - Start Game: Begin or resume your game.
-   - Reset Game: Reset all your progress and start anew.
-
-2. Gameplay:
-   - Follow on-screen prompts and instructions.
-   - Use real-life commands to interact with the environment and solve challenges.
-
-Contributing
-
-We welcome contributions to enhance Zero-Day Arena! If you'd like to contribute, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch:git checkout -b feature/YourFeatureName
-3. Make your changes and commit them: git commit -m 'Add some feature'
-4. Push to the branch: it push origin feature/YourFeatureName
-5. Open a pull request.
-
-License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-Contact
-
-For any inquiries, suggestions, or issues, feel free to contact us:
-
-- Aquila Cyber Team
-- Twitter: [AquilaCyber](https://twitter.com/AquilaCyber)
-- LinkedIn: [AquilaCyber](https://www.linkedin.com/company/AquilaCyber)
-- GitHub: [AquilaCyber](https://github.com/Aquilacyber)
-- Community [AquilaCyber](https://chat.whatsapp.com/Gq35cpJOuSFEdoZOktx2R8)
-
-Enjoy hacking in Zero-Day Arena! May the best hacker win!
+All challenges are web-based. No more running scripts by hand — just click and hack!
 
 
+## 💡 Tips for Success
+
+- 🔎 **Explore everything:** Inspect source code, try edge cases, and don’t be afraid to break things.
+- 🧩 **Use the hints:** Each challenge has built-in hints or riddles. If you’re stuck, look for clues!
+- 🛠️ **Try different tools:** For stego, use zsteg, stegsolve, or online LSB tools. For reversing, try pycdc, uncompyle6, or just a hex editor.
+- 🧠 **Think like an attacker:** What would a real hacker do? Try SQL injection payloads, brute force, or code analysis.
+- 💬 **Ask for help:** Stuck? Collaborate with friends or search online. Learning is the goal!
+- 🎉 **Have fun:** The best hackers are the ones who enjoy the puzzle.
+
+
+## 🤝 Contributing
+
+Want to add your own challenge, improve the UI, or make the lab even more fun? Fork the repo, open a pull request, or suggest ideas. All contributions are welcome!
+
+
+## 📜 License & Disclaimer
+
+This project is for educational and ethical hacking purposes only. Please use responsibly and do not attack systems you do not own or have permission to test.
+
+
+---
+
+Happy hacking, and may the flags be ever in your favor! 🦅🔥
