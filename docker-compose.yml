@@ -1,0 +1,23 @@
+services:
+  web-sqli:
+    build: ./web-sqli
+    ports:
+      - "5001:80"
+  crypto-xor:
+    build: ./crypto-xor
+    ports:
+      - "5002:5002"
+  reverse-pyc:
+    build: ./reverse-pyc
+    ports:
+      - "5003:5003"
+  forensics-stego:
+    build: ./forensics-stego
+    ports:
+      - "5004:5004"
+  php-app:
+    build: .
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
