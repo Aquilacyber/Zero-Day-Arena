@@ -103,8 +103,8 @@
 <header>
     <h1>AquilaCyber CTF Lab - Dashboard</h1>
     <nav>
-        <a href="homepage/index.html">Home</a>
-        <a href="settings.php">Settings</a>
+        <a href="../homepage/index.html">Home</a>
+        <a href="#">Settings</a>
     </nav>
 </header>
 <div class="container">
@@ -128,25 +128,25 @@
             <h3>Web: SQL Injection Challenge</h3>
             <p>Explore the web application vulnerable to SQL injection attacks. Use your skills to bypass authentication or extract sensitive data.</p>
             <a href="http://localhost:5001" target="_blank" class="hint-link">Open Challenge</a>
-            <a href="walkthrough.md#web-sqli" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
+            <a href="../walkthrough.md#web-sqli" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
         </div>
         <div class="challenge-card">
             <h3>Crypto: XOR Challenge</h3>
             <p>Analyze the XOR encryption Python script and decrypt the ciphertext to find the hidden flag.</p>
-            <a href="crypto-xor/challenge.py" target="_blank" class="hint-link">View Challenge</a>
-            <a href="walkthrough.md#crypto-xor" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
+            <a href="../crypto-xor/challenge.py" target="_blank" class="hint-link">View Challenge</a>
+            <a href="../walkthrough.md#crypto-xor" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
         </div>
         <div class="challenge-card">
             <h3>Reverse Engineering: CrackMe</h3>
             <p>Reverse engineer the Python CrackMe script to find the correct input and reveal the flag.</p>
-            <a href="reverse-pyc/crackme.py" target="_blank" class="hint-link">View Challenge</a>
-            <a href="walkthrough.md#reverse-pyc" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
+            <a href="../reverse-pyc/crackme.py" target="_blank" class="hint-link">View Challenge</a>
+            <a href="../walkthrough.md#reverse-pyc" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
         </div>
         <div class="challenge-card">
             <h3>Forensics: Steganography</h3>
             <p>Extract hidden data from the steganography image file and uncover the secret flag.</p>
-            <a href="forensics-stego/hidden.jpg" target="_blank" class="hint-link">View Challenge</a>
-            <a href="walkthrough.md#forensics-stego" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
+            <a href="../forensics-stego/hidden.jpg" target="_blank" class="hint-link">View Challenge</a>
+            <a href="../walkthrough.md#forensics-stego" target="_blank" class="hint-link" style="margin-left: 15px;">View Walkthrough</a>
         </div>
     </section>
 </div>

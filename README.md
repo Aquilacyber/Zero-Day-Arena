@@ -24,8 +24,8 @@ Each challenge is web-based, visually modern, and comes with hints and narrative
 
 Before you begin, make sure you have the following installed:
 
-- **Docker**
-- **Docker Compose**
+- **Docker Desktop** (for easy management of containers)
+- **Docker Compose** (usually included with Docker Desktop)
 
 That's it! The entire lab environment is containerized, so you don't need to worry about local dependencies like PHP or Python.
 
@@ -37,9 +37,9 @@ That's it! The entire lab environment is containerized, so you don't need to wor
     cd aquilacyber_ctf_lab
     ```
 
-2.  **Run the launch script:**
+2.  **Run the setup script:**
     ```bash
-    ./run_docker.sh
+    ./setup.sh
     ```
     This command will build the Docker images for each challenge and start all the services in the background.
 
@@ -47,11 +47,16 @@ That's it! The entire lab environment is containerized, so you don't need to wor
 
 Once the script is finished, the entire CTF lab is up and running.
 
--   **Main Dashboard:** [http://localhost:8000/login.php](http://localhost:8000/login.php)
-    -   **Username:** `admin`
-    -   **Password:** `admin`
+-   **Main Dashboard:** [http://localhost:8000/index.php](http://localhost:8000/index.php)
 
-    Start here to log in and see all the available challenges. The dashboard provides links to each individual challenge.
+    Start here to see all the available challenges. The dashboard provides links to each individual challenge and a progress tracker where you can input flags.
+
+-   **Screenshots:** Check the `screenshots/` directory for images of the dashboard and some of the challenge interfaces.
+
+    ![Dashboard](screenshots/dashboard.png)
+    ![Web SQLi Challenge](screenshots/web-sqli.png)
+    ![Crypto XOR Challenge](screenshots/crypto-xor.png)
+ 
 
 -   **Direct Challenge Links:**
     -   **Web SQLi:** [http://localhost:5001](http://localhost:5001)
@@ -70,6 +75,7 @@ To stop the lab, run `docker-compose down`.
 - 🧠 **Think like an attacker:** What would a real hacker do? Try SQL injection payloads, brute force, or code analysis.
 - 💬 **Ask for help:** Stuck? Collaborate with friends or search online. Learning is the goal!
 - 🎉 **Have fun:** The best hackers are the ones who enjoy the puzzle.
+- 🏁 **Flag Format:** All flags are in the format `flag{...}`. Use the progress tracker on the dashboard to input and verify your flags.
 
 
 ## 🤝 Contributing

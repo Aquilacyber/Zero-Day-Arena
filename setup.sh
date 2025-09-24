@@ -82,14 +82,14 @@ sleep 1
 typing_effect "All checks passed! Let's fire up the lab environment."
 sleep 1
 if command -v docker &> /dev/null; then
-    typing_effect "Starting the Web SQLi challenge with Docker Compose..."
+    typing_effect "Starting all challenges with Docker Compose..."
     if ! docker info > /dev/null 2>&1; then
         typing_effect "Docker daemon is not running or you do not have permission to access it."
         typing_effect "Please ensure your user is in the 'docker' group and the daemon is running."
         typing_effect "Try: sudo usermod -aG docker $USER && newgrp docker"
         exit 1
     fi
-    docker compose up 
+    docker compose up -d
     if [ $? -ne 0 ]; then
         typing_effect "Docker Compose failed. Checking Docker daemon status..."
         if ! docker info > /dev/null 2>&1; then
@@ -101,56 +101,23 @@ if command -v docker &> /dev/null; then
             fi
             typing_effect "Automatic Docker daemon start is not supported on this system."
             typing_effect "Please start the Docker daemon manually and rerun the script."
+            typing_effect "If Docker Compose still doesn't work, consider installing Docker Desktop from https://www.docker.com/products/docker-desktop/"
             exit 1
         fi
     fi
     echo
-    typing_effect "The SQLi challenge is now running on http://localhost:5001"
+    typing_effect "All challenges are now running:"
+    typing_effect "  - Web SQLi: http://localhost:5001"
+    typing_effect "  - Crypto XOR: http://localhost:5002"
+    typing_effect "  - Reverse PYC: http://localhost:5003"
+    typing_effect "  - Forensics Stego: http://localhost:5004"
+    typing_effect "  - PHP App: http://localhost:8000"
 else
-    typing_effect "Skipping the SQLi challenge because Docker isn't available."
+    typing_effect "Docker is not available. Please install Docker to run the challenges."
+    exit 1
 fi
 sleep 1
 
 # --- Final Instructions ---
-echo
-typing_effect "Starting the PHP server for the main homepage..."
-php -S localhost:8000 -t homepage > /dev/null 2>&1 &
-sleep 2
-typing_effect "The homepage is now running at http://localhost:8000"
-typing_effect "Open this URL in your browser to start exploring the CTF."
-echo
-
-
-typing_effect "Starting the XOR Crypto Flask challenge on port 5002..."
-# Check for Flask, install if missing
-if ! python3 -c "import flask" 2>/dev/null; then
-    typing_effect "Flask is not installed for Python 3. Installing..."
-    pip3 install flask
-fi
-# Start the XOR Flask app in the background
-nohup python3 crypto-xor/challenge.py > /dev/null 2>&1 &
-sleep 2
-typing_effect "The XOR Crypto challenge is now running at http://localhost:5002 (open http://localhost:5002 in your browser to solve it)"
-
-typing_effect "Starting the Forensics Steganography Flask challenge on port 5004..."
-nohup python3 forensics-stego/embed_flag.py > /dev/null 2>&1 &
-sleep 2
-typing_effect "The Forensics Steganography challenge is now running at http://localhost:5004 (open http://localhost:5004 in your browser to solve it)"
-
-typing_effect "Starting the CrackMe Flask challenge on port 5003..."
-if [ -f reverse-pyc/secret_check.py ]; then
-    typing_effect "Compiling secret_check.py to .pyc for the challenge..."
-    python3 -m py_compile reverse-pyc/secret_check.py
-    # Move the .pyc to a predictable name for import
-    pyc_file=$(ls reverse-pyc/__pycache__/secret_check*.pyc | head -n1)
-    mv "$pyc_file" reverse-pyc/secret_check.cpython-311.pyc
-    rm reverse-pyc/secret_check.py
-    rm -rf reverse-pyc/__pycache__
-    typing_effect "Obfuscated password check ready. Source removed."
-fi
-nohup python3 reverse-pyc/crackme.py > /dev/null 2>&1 &
-sleep 2
-typing_effect "The CrackMe challenge is now running at http://localhost:5003"
-
 echo
 typing_effect "Setup complete. Happy hacking! 🔥🦅"

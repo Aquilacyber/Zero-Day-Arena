@@ -10,7 +10,7 @@ services:
   reverse-pyc:
     build: ./reverse-pyc
     ports:
-      - "5003:5003"
+      - "5003:5000"
   forensics-stego:
     build: ./forensics-stego
     ports:
