@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML Parser - XXE</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>XML Parser</h1>
+        <p style="color: var(--text-secondary);">XXE Challenge - Parse XML data</p>
+
+        <div class="glass-panel" style="margin-top: 30px;">
+            <form method="POST" action="/challenge/xxe">
+                <label>XML Input</label>
+                <textarea name="xml" rows="10" placeholder="<?xml version='1.0'?><data>Hello</data>"
+                    style="background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; width: 100%; border-radius: 3px; font-family: var(--font-mono); margin-bottom: 16px;"></textarea>
+
+                <button type="submit" class="btn">Parse XML</button>
+            </form>
+
+            <% if (result) { %>
+                <div
+                    style="margin-top: 20px; padding: 16px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 4px;">
+                    <strong>Result:</strong>
+                    <pre
+                        style="margin-top: 10px; font-family: var(--font-mono); white-space: pre-wrap;"><%= result %></pre>
+                </div>
+                <% } %>
+
+                    <div
+                        style="margin-top: 30px; padding: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 4px;">
+                        <span class="hint-title">💡 Hint</span>
+                        <p style="margin: 0; font-size: 0.9rem;">XML External Entities are enabled. Can you read local
+                            files?</p>
+                    </div>
+        </div>
+
+        <a href="/" class="btn" style="margin-top: 20px;">← Back to Dashboard</a>
+    </div>
+</body>
+
+</html>

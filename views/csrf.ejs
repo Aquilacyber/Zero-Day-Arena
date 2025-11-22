@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Panel - CSRF</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Settings Panel</h1>
+        <p style="color: var(--text-secondary);">CSRF Challenge - Update your account settings</p>
+
+        <div class="glass-panel" style="margin-top: 30px;">
+            <% if (message) { %>
+                <div
+                    style="padding: 12px; background: rgba(0, 255, 136, 0.1); border: 1px solid var(--accent); border-radius: 4px; margin-bottom: 20px;">
+                    <%= message %>
+                </div>
+                <% } %>
+
+                    <form method="POST" action="/challenge/csrf/update">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="<%= settings.email %>" required>
+
+                        <label>Theme</label>
+                        <select name="theme"
+                            style="background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; width: 100%; border-radius: 3px; margin-bottom: 16px;">
+                            <option value="dark" <%=settings.theme==='dark' ? 'selected' : '' %>>Dark</option>
+                            <option value="light" <%=settings.theme==='light' ? 'selected' : '' %>>Light</option>
+                        </select>
+
+                        <button type="submit" class="btn">Update Settings</button>
+                    </form>
+
+                    <div
+                        style="margin-top: 30px; padding: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 4px;">
+                        <span class="hint-title">💡 Hint</span>
+                        <p style="margin: 0; font-size: 0.9rem;">This form has no CSRF protection. Can you forge a
+                            request from another origin?</p>
+                    </div>
+        </div>
+
+        <a href="/" class="btn" style="margin-top: 20px;">← Back to Dashboard</a>
+    </div>
+</body>
+
+</html>

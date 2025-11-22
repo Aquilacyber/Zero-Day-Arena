@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Vault</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
+
+        <div class="glass-panel">
+            <h2>Top Secret Vault</h2>
+            <p style="opacity: 0.7; margin-bottom: 20px;">Authorized personnel only. Biometric scan required.</p>
+
+            <% if (locals.error) { %>
+                <div
+                    style="background: rgba(255, 0, 85, 0.2); border: 1px solid var(--accent-secondary); color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    ⚠ ACCESS DENIED: <%= error %>
+                </div>
+                <% } %>
+
+                    <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 20px;">
+                        <p><strong>Identity:</strong>
+                            <%= user.username %>
+                        </p>
+                        <p><strong>Clearance Level:</strong>
+                            <%= user.role %>
+                        </p>
+
+                        <% if (flag) { %>
+                            <div
+                                style="background: rgba(0, 242, 255, 0.1); border: 1px dashed var(--accent-primary); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                                <strong style="color: var(--accent-primary);">VAULT UNLOCKED:</strong>
+                                <code style="margin-left: 10px;"><%= flag %></code>
+                            </div>
+                            <% } else { %>
+                                <div
+                                    style="margin-top: 20px; opacity: 0.5; border-top: 1px solid var(--glass-border); padding-top: 10px;">
+                                    <p>Vault content is encrypted. Admin clearance required.</p>
+                                </div>
+                                <% } %>
+                    </div>
+        </div>
+
+        <div class="glass-panel">
+            <span class="hint-title">💡 MISSION HINT</span>
+            <p style="opacity: 0.8; margin: 0;">Your session is managed by a JWT cookie. Can you forge a token with
+                <code>"alg": "none"</code> to become an admin?</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>
+                <%= title %>
+            </title>
+            <link rel="stylesheet" href="/style.css">
+        </head>
+
+        <body>
+            <div class="container">
+                <header
+                    style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>AQUILA CTF</h1>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">Web Application Security Assessment
+                            Platform</p>
+                    </div>
+                    <div style="text-align: right; display: flex; align-items: center; gap: 16px;">
+                        <button id="themeToggle" class="theme-toggle" title="Toggle Theme (Ctrl+J)">
+                            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                            <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </button>
+                        <div style="margin-bottom: 0;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Logged in as:</span>
+                            <span
+                                style="color: var(--accent); font-family: var(--font-mono); font-weight: 600; font-size: 0.9rem;">
+                                <%= user %>
+                            </span>
+                        </div>
+                        <a href="/auth/logout" class="btn"
+                            style="padding: 6px 16px; font-size: 0.8rem; border-color: var(--border); color: var(--text-secondary);">Logout</a>
+                    </div>
+                </header>
+
+                <!-- Scoreboard -->
+                <div class="glass-panel fade-in" style="margin-bottom: 24px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">Progress</h2>
+                        <div style="display: flex; align-items: center; gap: 24px;">
+                            <div class="timer-display">
+                                <%= timeDisplay %>
+                            </div>
+                            <div class="stat-value">
+                                <%= score %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: <%= progress %>%;"></div>
+                    </div>
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                        <%= solved.length %> of 10 challenges completed
+                    </p>
+                </div>
+
+                <!-- Flag Submission -->
+                <div class="glass-panel fade-in" style="margin-bottom: 24px; animation-delay: 0.1s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>Submit Flag</h2>
+                        <span class="kbd">Ctrl+Enter</span>
+                    </div>
+                    <form id="flagForm" style="display: flex; gap: 12px;">
+                        <input type="text" id="flagInput" placeholder="CTF{...}" style="margin-bottom: 0; flex: 1;">
+                        <button type="submit" class="btn">Submit</button>
+                    </form>
+                    <div id="flagMessage"
+                        style="margin-top: 12px; padding: 12px; border-radius: 3px; display: none; font-size: 0.9rem;">
+                    </div>
+                </div>
+
+                <!-- Challenges -->
+                <div class="glass-panel fade-in" style="animation-delay: 0.2s;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">Challenges</h2>
+                        <span class="system-status">Online</span>
+                    </div>
+
+                    <div class="challenge-grid">
+                        <% challenges.forEach(function(challenge) { %>
+                            <div class="challenge-card <%= challenge.status === 'Solved' ? 'solved' : '' %>">
+                                <div>
+                                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <div class="challenge-type">
+                                            <%= challenge.type %>
+                                        </div>
+                                        <span
+                                            class="difficulty-badge difficulty-<%= challenge.difficulty.toLowerCase() %>">
+                                            <%= challenge.difficulty %>
+                                        </span>
+                                    </div>
+                                    <h3>
+                                        <%= challenge.name %>
+                                    </h3>
+                                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 8px 0;">
+                                        <%= challenge.description %>
+                                    </p>
+                                    <% if (challenge.status==='Solved' ) { %>
+                                        <span class="status-badge status-solved">Completed</span>
+                                        <% } %>
+                                </div>
+                                <div style="margin-top: 20px; display: flex; gap: 8px;">
+                                    <a href="/challenge/<%= challenge.name.toLowerCase().includes('login') ? 'login' : challenge.name.toLowerCase().includes('search') ? 'search' : challenge.name.toLowerCase().includes('profile') ? 'profile' : challenge.name.toLowerCase().includes('vault') ? 'vault' : challenge.name.toLowerCase().includes('calculator') ? 'calculator' : challenge.name.toLowerCase().includes('settings') ? 'csrf' : challenge.name.toLowerCase().includes('file') ? 'upload' : challenge.name.toLowerCase().includes('xml') ? 'xxe' : challenge.name.toLowerCase().includes('url') ? 'ssrf' : 'ping' %>"
+                                        class="btn" style="flex: 1; text-align: center;">Start</a>
+                                    <% if (challenge.status==='Solved' ) { %>
+                                        <a href="/writeup/<%= challenge.id %>" class="btn"
+                                            style="flex: 1; text-align: center; border-color: var(--text-muted); color: var(--text-muted);">Writeup</a>
+                                        <% } %>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>AQUILA Security Assessment Platform © 2025</p>
+                    <a href="/export-progress"
+                        style="color: var(--accent); text-decoration: none; font-size: 0.85rem; margin-top: 10px; display: inline-block;">Download
+                        Progress Report (JSON)</a>
+                </footer>
+            </div>
+
+            <!-- Completion Modal -->
+            <div id="completionModal"
+                style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); z-index: 1000; justify-content: center; align-items: center;">
+                <div id="certificateCard"
+                    style="background: var(--bg-secondary); border: 1px solid var(--accent); border-radius: 4px; padding: 60px 50px; text-align: center; max-width: 600px; position: relative;">
+                    <div style="position: absolute; top: 16px; right: 16px;">
+                        <button onclick="document.getElementById('completionModal').style.display='none'"
+                            style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0; width: 32px; height: 32px;">&times;</button>
+                    </div>
+
+                    <div style="margin-bottom: 36px;">
+                        <div style="font-size: 4rem; margin-bottom: 16px; filter: grayscale(1) brightness(1.2);">🏆
+                        </div>
+                        <h1 style="font-size: 2rem; margin-bottom: 12px; font-weight: 700; letter-spacing: -0.5px;">
+                            Assessment
+                            Complete</h1>
+                        <p style="color: var(--text-secondary); margin-bottom: 0;">All security challenges successfully
+                            completed</p>
+                    </div>
+
+                    <div
+                        style="background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 3px; padding: 24px; margin-bottom: 36px;">
+                        <p
+                            style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 12px;">
+                            Certificate of Completion</p>
+                        <p style="font-size: 1.1rem; margin-bottom: 8px; line-height: 1.5;">Successfully identified and
+                            exploited <span style="color: var(--accent); font-weight: 600;">10 critical
+                                vulnerabilities</span>
+                            across the AQUILA security assessment platform.</p>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Demonstrated proficiency
+                            in web
+                            application security testing.</p>
+                    </div>
+
+                    <button id="shareBtn" class="btn" style="padding: 12px 28px;">Download Certificate</button>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+            <script>
+                const flagForm = document.getElementById('flagForm');
+                const flagInput = document.getElementById('flagInput');
+                const flagMessage = document.getElementById('flagMessage');
+                const completionModal = document.getElementById('completionModal');
+                const shareBtn = document.getElementById('shareBtn');
+                const themeToggle = document.getElementById('themeToggle');
+                const moonIcon = document.getElementById('moonIcon');
+                const sunIcon = document.getElementById('sunIcon');
+
+                // Sounds
+                const sounds = {
+                    success: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA=='), // Placeholder
+                    error: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA==') // Placeholder
+                };
+
+                // Simple beep generation for now
+                const playSound = (type) => {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    if (type === 'success') {
+                        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.3);
+                    } else {
+                        osc.frequency.setValueAtTime(150, ctx.currentTime);
+                        osc.type = 'sawtooth';
+                        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.2);
+                    }
+                };
+
+                // Theme Management
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+
+                themeToggle.addEventListener('click', () => {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
+                });
+
+                function updateThemeIcon(theme) {
+                    if (theme === 'dark') {
+                        moonIcon.style.display = 'block';
+                        sunIcon.style.display = 'none';
+                    } else {
+                        moonIcon.style.display = 'none';
+                        sunIcon.style.display = 'block';
+                    }
+                }
+
+                const solvedCount = <%= solved.length %>;
+                if (solvedCount === 10) {
+                    setTimeout(() => {
+                        showCompletion();
+                        playSound('success');
+                    }, 800);
+                }
+
+                // Auto-update timer every second
+                setInterval(() => {
+                    location.reload();
+                }, 60000); // Reload every minute to update timer
+
+                flagForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const flag = flagInput.value.trim();
+
+                    if (!flag) return;
+
+                    const response = await fetch('/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `flag=${encodeURIComponent(flag)}`
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Show toast notification
+                        showToast(data.challengeName + ' completed! +100 pts', 'success');
+                        playSound('success');
+                        flagInput.value = '';
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        playSound('error');
+                        flagMessage.style.display = 'block';
+                        flagMessage.style.background = 'rgba(255, 68, 68, 0.1)';
+                        flagMessage.style.border = '1px solid var(--danger)';
+                        flagMessage.style.color = 'var(--danger)';
+                        flagMessage.textContent = `✗ ${data.message}`;
+                    }
+                });
+
+                function showToast(message, type) {
+                    const toast = document.createElement('div');
+                    toast.className = `toast ${type}`;
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 3000);
+                }
+
+                function showCompletion() {
+                    const duration = 3 * 1000;
+                    const animationEnd = Date.now() + duration;
+                    const defaults = { startVelocity: 25, spread: 360, ticks: 50, zIndex: 2000, colors: ['#00ff88', '#00cc6a', '#ffffff'] };
+
+                    function randomInRange(min, max) {
+                        return Math.random() * (max - min) + min;
+                    }
+
+                    const interval = setInterval(function () {
+                        const timeLeft = animationEnd - Date.now();
+
+                        if (timeLeft <= 0) {
+                            return clearInterval(interval);
+                        }
+
+                        const particleCount = 30 * (timeLeft / duration);
+                        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.2, 0.4), y: Math.random() - 0.2 } }));
+                        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.6, 0.8), y: Math.random() - 0.2 } }));
+                    }, 250);
+
+                    completionModal.style.display = 'flex';
+                }
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        if (document.activeElement === flagInput) {
+                            flagForm.dispatchEvent(new Event('submit'));
+                        } else {
+                            flagInput.focus();
+                        }
+                    }
+                    if (e.ctrlKey && e.key === 'j') {
+                        e.preventDefault();
+                        themeToggle.click();
+                    }
+                    if (e.key === 'Escape') {
+                        completionModal.style.display = 'none';
+                    }
+                });
+            </script>
+        </body>
+
+        </html>

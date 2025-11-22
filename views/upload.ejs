@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager - Upload</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>File Manager</h1>
+        <p style="color: var(--text-secondary);">File Upload Challenge - Upload files to the server</p>
+
+        <div class="glass-panel" style="margin-top: 30px;">
+            <% if (message) { %>
+                <div
+                    style="padding: 12px; background: rgba(0, 255, 136, 0.1); border: 1px solid var(--accent); border-radius: 4px; margin-bottom: 20px;">
+                    <%= message %>
+                </div>
+                <% } %>
+
+                    <form method="POST" action="/challenge/upload" enctype="multipart/form-data">
+                        <label>Select File</label>
+                        <input type="file" name="file" required
+                            style="background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; width: 100%; border-radius: 3px; margin-bottom: 16px;">
+
+                        <button type="submit" class="btn">Upload File</button>
+                    </form>
+
+                    <div
+                        style="margin-top: 30px; padding: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 4px;">
+                        <span class="hint-title">💡 Hint</span>
+                        <p style="margin: 0; font-size: 0.9rem;">No file type validation! Try uploading any file and
+                            check the uploads directory.</p>
+                    </div>
+        </div>
+
+        <a href="/" class="btn" style="margin-top: 20px;">← Back to Dashboard</a>
+    </div>
+</body>
+
+</html>

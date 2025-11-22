@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Database Search</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
+
+        <div class="glass-panel">
+            <h2>Employee Database Search</h2>
+            <p style="opacity: 0.7; margin-bottom: 20px;">Enter a name to search the internal directory.</p>
+
+            <form action="/challenge/search" method="GET" style="display: flex; gap: 10px;">
+                <input type="text" name="q" placeholder="Search query..." value="<%= query %>"
+                    style="margin-bottom: 0;">
+                <button type="submit" class="btn">Search</button>
+            </form>
+
+            <% if (query) { %>
+                <div style="margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                    <h3>Results for: <span style="color: var(--accent-primary);"><%- query %></span></h3>
+                    <p style="opacity: 0.6;">No matching records found in the current shard.</p>
+                </div>
+                <% } %>
+        </div>
+
+        <div class="glass-panel">
+            <span class="hint-title">💡 MISSION HINT</span>
+            <p style="opacity: 0.8; margin: 0;">The search term is reflected back to the page without sanitization. Try
+                injecting HTML or JavaScript.</p>
+        </div>
+    </div>
+</body>
+
+</html>

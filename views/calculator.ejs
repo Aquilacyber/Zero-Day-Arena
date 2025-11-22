@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced Calculator</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
+
+        <div class="glass-panel">
+            <h2>Quantum Calculator</h2>
+            <p style="opacity: 0.7; margin-bottom: 20px;">Perform complex calculations on our supercomputer.</p>
+
+            <form action="/challenge/calculator" method="POST" style="display: flex; gap: 10px;">
+                <input type="text" name="expression" placeholder="e.g., 2 + 2 * 4" style="margin-bottom: 0;">
+                <button type="submit" class="btn">Calculate</button>
+            </form>
+
+            <% if (result !==null) { %>
+                <div
+                    style="margin-top: 20px; background: #000; padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); font-family: var(--font-code);">
+                    <h3 style="color: var(--accent-primary); font-size: 0.9rem; margin-bottom: 10px;">> CALCULATION
+                        RESULT</h3>
+                    <pre style="margin: 0; white-space: pre-wrap; color: #ccc;"><%= result %></pre>
+                </div>
+                <% } %>
+        </div>
+
+        <div class="glass-panel">
+            <span class="hint-title">💡 MISSION HINT</span>
+            <p style="opacity: 0.8; margin: 0;">The calculator uses a dangerous function to evaluate expressions. Can
+                you access the <code>process</code> or <code>require</code> objects?</p>
+        </div>
+    </div>
+</body>
+
+</html>

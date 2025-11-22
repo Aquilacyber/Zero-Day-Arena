@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
+
+        <div class="glass-panel">
+            <h2>User Profile</h2>
+
+            <% if (user) { %>
+                <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 20px; margin-top: 20px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div
+                            style="width: 60px; height: 60px; background: var(--accent-primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #000; font-weight: bold; margin-right: 20px;">
+                            <%= user.username.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0;">
+                                <%= user.username %>
+                            </h3>
+                            <span class="status-badge <%= user.isAdmin ? 'status-solved' : 'status-locked' %>">
+                                <%= user.isAdmin ? 'ADMINISTRATOR' : 'GUEST USER' %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <% if (flag) { %>
+                        <div
+                            style="background: rgba(0, 242, 255, 0.1); border: 1px dashed var(--accent-primary); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <strong style="color: var(--accent-primary);">SECRET FLAG:</strong>
+                            <code style="margin-left: 10px;"><%= flag %></code>
+                        </div>
+                        <% } %>
+                </div>
+                <% } else { %>
+                    <p>User not found.</p>
+                    <% } %>
+        </div>
+
+        <div class="glass-panel">
+            <span class="hint-title">💡 MISSION HINT</span>
+            <p style="opacity: 0.8; margin: 0;">Check the URL parameters. Is there a way to view another user's profile
+                by changing the ID?</p>
+        </div>
+    </div>
+</body>
+
+</html>

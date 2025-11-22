@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution: <%= challenge.name %>
+    </title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header style="margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <h1 style="margin: 0;">Writeup: <%= challenge.name %>
+                </h1>
+                <span class="difficulty-badge difficulty-<%= challenge.difficulty.toLowerCase() %>">
+                    <%= challenge.difficulty %>
+                </span>
+            </div>
+            <p style="color: var(--text-secondary); margin-top: 8px;">Detailed solution and vulnerability explanation
+            </p>
+        </header>
+
+        <div class="glass-panel">
+            <h2 style="color: var(--accent);">Vulnerability Analysis</h2>
+            <p style="white-space: pre-line;">
+                <%= writeup.analysis %>
+            </p>
+
+            <h2 style="color: var(--accent); margin-top: 30px;">Exploitation Steps</h2>
+            <ol style="padding-left: 20px; line-height: 1.8;">
+                <% writeup.steps.forEach(step=> { %>
+                    <li>
+                        <%= step %>
+                    </li>
+                    <% }); %>
+            </ol>
+
+            <h2 style="color: var(--accent); margin-top: 30px;">Remediation</h2>
+            <p style="white-space: pre-line;">
+                <%= writeup.remediation %>
+            </p>
+        </div>
+
+        <a href="/" class="btn">← Back to Dashboard</a>
+    </div>
+</body>
+
+</html>

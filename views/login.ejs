@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Login</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
+
+        <div class="glass-panel" style="max-width: 500px; margin: 0 auto;">
+            <h2 style="text-align: center; margin-bottom: 30px;">Admin Authentication</h2>
+
+            <% if (error) { %>
+                <div
+                    style="background: rgba(255, 0, 85, 0.2); border: 1px solid var(--accent-secondary); color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    ⚠ ACCESS DENIED: <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (locals.success) { %>
+                        <div
+                            style="background: rgba(0, 242, 255, 0.2); border: 1px solid var(--accent-primary); color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            ✔ ACCESS GRANTED: <%= success %>
+                        </div>
+                        <% } %>
+
+                            <form action="/challenge/login" method="POST">
+                                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Username</label>
+                                <input type="text" name="username" placeholder="Enter username...">
+
+                                <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Password</label>
+                                <input type="password" name="password" placeholder="Enter password...">
+
+                                <button type="submit" class="btn"
+                                    style="width: 100%; margin-top: 10px;">Authenticate</button>
+                            </form>
+        </div>
+
+        <div class="glass-panel" style="max-width: 500px; margin: 20px auto;">
+            <span class="hint-title">💡 MISSION HINT</span>
+            <p style="opacity: 0.8; margin: 0;">The query uses direct string concatenation. Can you manipulate the
+                string to ignore the password check?</p>
+        </div>
+    </div>
+</body>
+
+</html>

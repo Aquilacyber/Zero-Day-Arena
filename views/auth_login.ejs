@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Aquila CTF</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container" style="max-width: 400px; margin-top: 100px;">
+        <h1 style="text-align: center; margin-bottom: 30px;">Login</h1>
+
+        <div class="glass-panel">
+            <% if (error) { %>
+                <div
+                    style="padding: 12px; background: rgba(255, 68, 68, 0.1); border: 1px solid var(--danger); border-radius: 4px; margin-bottom: 20px; color: var(--danger);">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <form method="POST" action="/auth/login">
+                        <label>Username</label>
+                        <input type="text" name="username" required>
+
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+
+                        <button type="submit" class="btn" style="width: 100%;">Login</button>
+                    </form>
+
+                    <p style="text-align: center; margin-top: 20px; color: var(--text-secondary);">
+                        Don't have an account? <a href="/auth/register" style="color: var(--accent);">Register</a>
+                    </p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/" style="color: var(--text-muted); text-decoration: none;">← Back to Home</a>
+        </div>
+    </div>
+</body>
+
+</html>

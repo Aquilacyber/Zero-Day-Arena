@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Fetcher - SSRF</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>URL Fetcher</h1>
+        <p style="color: var(--text-secondary);">SSRF Challenge - Fetch content from any URL</p>
+
+        <div class="glass-panel" style="margin-top: 30px;">
+            <form method="POST" action="/challenge/ssrf">
+                <label>URL to Fetch</label>
+                <input type="text" name="url" placeholder="https://example.com" required>
+
+                <button type="submit" class="btn">Fetch URL</button>
+            </form>
+
+            <% if (content) { %>
+                <div
+                    style="margin-top: 20px; padding: 16px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 4px; max-height: 400px; overflow-y: auto;">
+                    <strong>Response:</strong>
+                    <pre
+                        style="margin-top: 10px; font-family: var(--font-mono); white-space: pre-wrap; font-size: 0.85rem;"><%= content %></pre>
+                </div>
+                <% } %>
+
+                    <div
+                        style="margin-top: 30px; padding: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 4px;">
+                        <span class="hint-title">💡 Hint</span>
+                        <p style="margin: 0; font-size: 0.9rem;">The server makes requests on your behalf. Can you
+                            access internal resources?</p>
+                    </div>
+        </div>
+
+        <a href="/" class="btn" style="margin-top: 20px;">← Back to Dashboard</a>
+    </div>
+</body>
+
+</html>
