@@ -1,0 +1,13 @@
+node_modules/
+aquila.json
+.git/
+.gitignore
+*.log
+.env
+.DS_Store
+uploads/*
+README.md
+.gemini/
+docker-compose.yml
+docker-compose.override.yml
+phantom-insider/_tmp_gen/

@@ -22,8 +22,8 @@ module.exports = {
         analysis: "The application uses an insecure direct object reference (IDOR) to retrieve user profiles. It trusts the 'id' parameter without verifying if the logged-in user is authorized to access that resource.",
         steps: [
             "Log in and observe the URL: /challenge/profile?id=2",
-            "Change the 'id' parameter to 1 (usually the admin ID).",
-            "Access /challenge/profile?id=1 to view the admin profile and flag."
+            "Change the 'id' parameter to other values to enumerate users.",
+            "The admin user has ID 7. Access /challenge/profile?id=7 to view the admin profile and flag."
         ],
         remediation: "Implement proper access control checks to ensure the user is authorized to access the requested resource."
     },
@@ -32,7 +32,7 @@ module.exports = {
         steps: [
             "Enter a valid IP address to verify functionality.",
             "Append a command separator (; or &&) followed by a malicious command.",
-            "Payload: 127.0.0.1 && type flag.txt (Windows) or 127.0.0.1 && cat flag.txt (Linux)"
+            "Payload: 127.0.0.1 && type flag_ping.txt (Windows) or 127.0.0.1 && cat flag_ping.txt (Linux)"
         ],
         remediation: "Avoid calling system commands if possible. If necessary, use APIs that don't invoke a shell, or strictly validate input against an allowlist."
     },
@@ -52,7 +52,7 @@ module.exports = {
         steps: [
             "Identify that the input is being evaluated as code.",
             "Inject Node.js code to read the file system.",
-            "Payload: process.mainModule.require('fs').readFileSync('flag.txt','utf8')"
+            "Payload: require('fs').readFileSync('flag_calc.txt','utf8')"
         ],
         remediation: "Never use eval(). Use a safe math parsing library instead."
     },
@@ -70,7 +70,7 @@ module.exports = {
         steps: [
             "Create a text file containing a message or code.",
             "Upload the file via the form.",
-            "Access the uploaded file in the /uploads/ directory."
+            "Access the directory listing at /challenge/uploads to find the flag."
         ],
         remediation: "Validate file types against an allowlist, rename uploaded files, and store them outside the web root if possible."
     },
@@ -79,7 +79,7 @@ module.exports = {
         steps: [
             "Intercept the XML request.",
             "Inject a DOCTYPE definition with an external entity pointing to a local file.",
-            "Payload: <!DOCTYPE foo [<!ENTITY xxe SYSTEM 'file:///flag.txt'>]>",
+            "Payload: <!DOCTYPE foo [<!ENTITY xxe SYSTEM 'flag_xxe.txt'>]>",
             "Reference the entity &xxe; in the XML data."
         ],
         remediation: "Disable DTD processing and external entity resolution in the XML parser configuration."
@@ -92,5 +92,14 @@ module.exports = {
             "Payload: http://localhost:3000/internal/flag"
         ],
         remediation: "Validate user-supplied URLs against an allowlist of permitted domains and protocols. Block access to internal IP ranges."
+    },
+    11: {
+        analysis: "Phantom Insider is a multi-stage OSINT investigation requiring intelligence gathering, forensic analysis, and password cracking to expose an insider threat.",
+        steps: [
+            "Flag 1: Review the Chatter archive and Blog snapshot. Note the insider's pet name and department. Cross-reference this with the NexaCorp Employee Directory CSV to identify the employee ID (E-8931) and access their profile page.",
+            "Flag 2: Download 'meetup_spot.jpg' from the blog. Use an EXIF viewer or 'exiftool' to inspect the image metadata. The flag is hidden inside the 'ImageDescription' field.",
+            "Flag 3: Search 'breach_dump_2024.txt' for the suspect's username to find an MD5 hash. Crack it using John the Ripper and the rockyou wordlist (password is 'liverpool123'). Use this password to extract the 'stolen_data.zip' archive and read the final flag."
+        ],
+        remediation: "Enforce strict metadata stripping on uploaded images, mandate strong password policies to prevent dictionary attacks, and implement robust access controls to prevent unauthorized data exfiltration."
     }
 };

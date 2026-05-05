@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XML Parser - XXE</title>
     <link rel="stylesheet" href="/style.css">
+    <script src="/theme.js"></script>
 </head>
 
 <body>
@@ -31,12 +32,17 @@
                 </div>
                 <% } %>
 
-                    <div
-                        style="margin-top: 30px; padding: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 4px;">
-                        <span class="hint-title">💡 Hint</span>
-                        <p style="margin: 0; font-size: 0.9rem;">XML External Entities are enabled. Can you read local
-                            files?</p>
+                    <div class="glass-panel" style="margin-top: 30px; padding: 20px; background: rgba(255, 170, 0, 0.1); border: 1px solid var(--warning); border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span class="hint-title" style="font-weight: 600; color: var(--warning);">💡 MISSION HINT</span>
+                            <button id="getHintBtn" class="btn" style="border-color: var(--warning); color: var(--warning); padding: 6px 12px; font-size: 0.85rem;" data-challenge-id="9">Get Hint (-20 pts)</button>
+                        </div>
+                        <div id="hintContainer">
+                            <p style="opacity: 0.6; margin: 0; font-size: 0.9rem;">Hints are progressive. Using a hint reduces your maximum possible score.</p>
+                        </div>
                     </div>
+
+                    <%- include('partials/hint_script') %>
         </div>
 
         <a href="/" class="btn" style="margin-top: 20px;">← Back to Dashboard</a>

@@ -1,0 +1,85 @@
+<%- include('modal') %>
+    <script>
+        (async function() {
+            const btn = document.getElementById('getHintBtn');
+            const container = document.getElementById('hintContainer');
+            const challengeId = btn.getAttribute('data-challenge-id');
+
+            // Load previously purchased hints on page load
+            try {
+                const loadRes = await fetch(`/hints/${challengeId}`);
+                const loadData = await loadRes.json();
+
+                if (loadData.hints && loadData.hints.length > 0) {
+                    loadData.hints.forEach(h => {
+                        const hintHtml = `
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(234, 179, 8, 0.1); border-left: 3px solid var(--warning); border-radius: 0 4px 4px 0;">
+                            <strong style="color: var(--warning); display: block; margin-bottom: 5px; font-size: 0.85rem;">HINT LEVEL ${h.level}</strong>
+                            <p style="margin: 0;">${h.hint}</p>
+                        </div>
+                    `;
+                        container.insertAdjacentHTML('beforeend', hintHtml);
+                    });
+
+                    if (loadData.hintsRemaining > 0) {
+                        btn.textContent = 'Get Next Hint (-20 pts)';
+                    } else {
+                        btn.textContent = 'No more hints';
+                        btn.disabled = true;
+                    }
+                }
+            } catch (e) {
+                // Silently fail — hints just won't be pre-loaded
+            }
+
+            // Handle new hint requests
+            btn.addEventListener('click', async function () {
+                const confirmed = await AquilaModal.confirm('This will cost 20 points from your score. Are you sure you want to use a hint?', {
+                    title: 'Use Hint?',
+                    icon: '💡',
+                    confirmText: 'Use Hint (-20 pts)',
+                    cancelText: 'Keep Points',
+                    btnClass: 'warning'
+                });
+
+                if (!confirmed) return;
+
+                btn.disabled = true;
+                btn.textContent = 'Loading...';
+
+                try {
+                    const res = await fetch('/hint', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ challengeId: parseInt(challengeId) })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        const hintHtml = `
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(234, 179, 8, 0.1); border-left: 3px solid var(--warning); border-radius: 0 4px 4px 0;">
+                            <strong style="color: var(--warning); display: block; margin-bottom: 5px; font-size: 0.85rem;">HINT LEVEL ${data.level}</strong>
+                            <p style="margin: 0;">${data.hint}</p>
+                        </div>
+                    `;
+                        container.insertAdjacentHTML('beforeend', hintHtml);
+
+                        if (data.hintsRemaining > 0) {
+                            btn.disabled = false;
+                            btn.textContent = 'Get Next Hint (-20 pts)';
+                        } else {
+                            btn.textContent = 'No more hints';
+                        }
+                    } else {
+                        await AquilaModal.alert(data.message, { type: 'warning', title: 'Hint Unavailable' });
+                        btn.disabled = false;
+                        btn.textContent = 'Get Hint (-20 pts)';
+                    }
+                } catch (err) {
+                    await AquilaModal.alert('Could not fetch hint. Please try again.', { type: 'error', title: 'Connection Error' });
+                    btn.disabled = false;
+                    btn.textContent = 'Get Hint (-20 pts)';
+                }
+            });
+        })();
+    </script>

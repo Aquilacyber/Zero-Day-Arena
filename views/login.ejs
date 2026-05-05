@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Login</title>
     <link rel="stylesheet" href="/style.css">
+    <script src="/theme.js"></script>
 </head>
 
 <body>
@@ -44,10 +43,16 @@
         </div>
 
         <div class="glass-panel" style="max-width: 500px; margin: 20px auto;">
-            <span class="hint-title">💡 MISSION HINT</span>
-            <p style="opacity: 0.8; margin: 0;">The query uses direct string concatenation. Can you manipulate the
-                string to ignore the password check?</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span class="hint-title" style="font-weight: 600; color: var(--warning);">💡 MISSION HINT</span>
+                <button id="getHintBtn" class="btn" style="border-color: var(--warning); color: var(--warning); padding: 6px 12px; font-size: 0.85rem;" data-challenge-id="1">Get Hint (-20 pts)</button>
+            </div>
+            <div id="hintContainer">
+                <p style="opacity: 0.6; margin: 0; font-size: 0.9rem;">Hints are progressive. Using a hint reduces your maximum possible score.</p>
+            </div>
         </div>
+
+        <%- include('partials/hint_script') %>
     </div>
 </body>
 

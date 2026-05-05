@@ -1,9 +1,9 @@
 # 🦅 AQUILA CTF Platform
 
-A modern, feature-rich Capture The Flag (CTF) platform designed for learning web security vulnerabilities. Built with Node.js, Express, and EJS, featuring 10 intentionally vulnerable challenges covering common web security issues.
+A modern, feature-rich Capture The Flag (CTF) platform designed for learning web security vulnerabilities and OSINT techniques. Built with Node.js, Express, and EJS, featuring **13 intentionally vulnerable challenges** across 11 labs covering common web security issues and open-source intelligence.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-green)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ---
@@ -19,21 +19,29 @@ This platform contains **intentionally vulnerable code** for educational purpose
 ## 🎯 Features
 
 ### Core Functionality
-- ✅ **10 Web Security Challenges** - SQL Injection, XSS, IDOR, Command Injection, JWT Bypass, RCE, CSRF, File Upload, XXE, SSRF
-- ✅ **User Authentication** - Secure registration and login with bcrypt password hashing
-- ✅ **Progress Tracking** - Persistent user progress with session management
-- ✅ **Scoring System** - Points-based scoring with hint penalties
-- ✅ **Hint System** - 3-level hints for each challenge (-20 points per hint)
-- ✅ **Writeup System** - Detailed solutions unlocked after solving challenges
-- ✅ **Progress Export** - Download your progress as JSON
+- ✅ **13 Security Challenges** — SQL Injection, XSS, IDOR, Command Injection, JWT Bypass, RCE, CSRF, File Upload, XXE, SSRF, and a multi-stage OSINT Lab
+- ✅ **User Authentication** — Secure registration and login with bcrypt password hashing
+- ✅ **Progress Tracking** — Persistent user progress with session management
+- ✅ **Scoring System** — Points-based scoring with hint penalties
+- ✅ **Hint System** — 3-level progressive hints for each challenge (-20 points per hint)
+- ✅ **Writeup System** — Detailed solutions unlocked after solving challenges
+- ✅ **Leaderboard** — Multi-user score rankings
+- ✅ **Progress Export** — Download your progress as JSON
+- ✅ **Completion Certificate** — Auto-generated downloadable certificate with confetti celebration
 
 ### UI/UX Features
-- 🌓 **Dark/Light Mode** - Toggle between themes with persistence
-- ⌨️ **Keyboard Shortcuts** - `Ctrl+J` (theme), `Ctrl+Enter` (submit), `Esc` (close)
-- 🎨 **Modern Design** - Glassmorphism, gradients, and smooth animations
-- 🔊 **Sound Effects** - Audio feedback for actions
-- ⏱️ **Live Timer** - Track your solving time
-- 📊 **Progress Bar** - Visual progress indicator
+- 🌓 **Dark/Light Mode** — Toggle between themes with persistence
+- ⌨️ **Keyboard Shortcuts** — `Ctrl+J` (theme), `Ctrl+Enter` (submit), `Esc` (close)
+- 🎨 **Modern Design** — Glassmorphism, gradients, and smooth animations
+- 🔊 **Sound Effects** — Audio feedback for actions
+- ⏱️ **Live Timer** — Track your solving time
+- 📊 **Progress Bar** — Visual progress indicator
+- 🎉 **Completion Celebration** — Fullscreen confetti and certificate on 100% completion
+
+### Security Isolation
+- 🔒 **Sandboxed RCE** — Calculator lab uses a VM sandbox to prevent cross-challenge flag leakage
+- 🔒 **WAF-Protected Command Injection** — Ping lab restricts access to sensitive files via regex filtering
+- 🔒 **Filesystem Isolation** — Command execution runs inside a dedicated `ping_sandbox/` directory
 
 ---
 
@@ -56,14 +64,15 @@ This platform contains **intentionally vulnerable code** for educational purpose
 
 ### Prerequisites
 
-- **Node.js** v14.0.0 or higher
+- **Node.js** v18.0.0 or higher
 - **npm** (comes with Node.js)
 
 ### Steps
 
-1. **Clone or download the repository**
+1. **Clone the repository**
    ```bash
-   cd aquila_ctf
+   git clone https://github.com/AquilaCyber/CTF.git
+   cd CTF
    ```
 
 2. **Install dependencies**
@@ -71,31 +80,84 @@ This platform contains **intentionally vulnerable code** for educational purpose
    npm install
    ```
 
-3. **Verify installation**
+3. **Start the server**
    ```bash
-   npm list
+   npm start
    ```
+   > Flag files (`flag_calc.txt`, `flag_xxe.txt`, `ping_sandbox/flag_ping.txt`) are auto-generated on first startup.
 
 ### Dependencies
 
 The platform uses the following packages:
-- `express` - Web framework
-- `ejs` - Templating engine
-- `bcryptjs` - Password hashing
-- `express-session` - Session management
-- `alasql` - In-memory database with file persistence
-- `multer` - File upload handling
-- `axios` - HTTP client
-- `jsonwebtoken` - JWT handling
+- `express` — Web framework
+- `ejs` — Templating engine
+- `bcryptjs` — Password hashing
+- `express-session` — Session management
+- `cookie-parser` — Cookie handling
+- `alasql` — In-memory database with file persistence
+- `multer` — File upload handling
+- `axios` — HTTP client
+- `jsonwebtoken` — JWT handling
+- `sharp` — Image processing (for OSINT lab evidence generation)
 
 ---
 
-## 🎮 Quick Start
+## 🐳 Docker Quick Start (Recommended)
+
+### Prerequisites
+
+- **Docker** and **Docker Compose** installed ([Get Docker](https://docs.docker.com/get-docker/))
+
+### 1. Build and Start
+
+```bash
+docker compose up --build
+```
+
+You should see:
+```
+aquila-ctf  | Database initialized (AlaSQL with persistence)
+aquila-ctf  | Server running on http://localhost:3000
+```
+
+### 2. Open Your Browser
+
+Navigate to: **http://localhost:3000**
+
+### 3. Stop the Platform
+
+```bash
+docker compose down
+```
+
+### 4. Reset All Data
+
+To wipe all user data, progress, and uploads:
+```bash
+docker compose down -v
+```
+
+### Standalone Docker (without Compose)
+
+```bash
+# Build the image
+docker build -t aquila-ctf .
+
+# Run the container
+docker run -p 3000:3000 --name aquila-ctf aquila-ctf
+
+# Stop and remove
+docker stop aquila-ctf && docker rm aquila-ctf
+```
+
+---
+
+## 🎮 Manual Quick Start (Without Docker)
 
 ### 1. Start the Server
 
 ```bash
-node server.js
+npm start
 ```
 
 You should see:
@@ -117,9 +179,9 @@ Navigate to: **http://localhost:3000**
 ### 4. Start Solving Challenges
 
 - Login with your credentials
-- Browse the 10 challenges on the dashboard
-- Click **"Start"** on any challenge to begin
-- Submit flags in the format: `CTF{...}`
+- Browse the 11 challenge labs on the dashboard
+- Click **"Start"** or **"Investigate"** on any challenge to begin
+- Submit flags in the format: `CTF{...}` or `PI{...}` (for OSINT challenges)
 
 ### 5. Stop the Server
 
@@ -128,6 +190,8 @@ Press `Ctrl+C` in the terminal to stop the server.
 ---
 
 ## 🎯 Challenges
+
+### Web Security Labs (Challenges 1–10)
 
 | # | Challenge | Type | Difficulty | Description |
 |---|-----------|------|------------|-------------|
@@ -142,11 +206,21 @@ Press `Ctrl+C` in the terminal to stop the server.
 | 9 | **XML Parser** | XXE | 🔴 Hard | Extract data via XML entities |
 | 10 | **URL Fetcher** | SSRF | 🟡 Medium | Access internal resources |
 
+### OSINT Lab — Phantom Insider (Challenges 11–13)
+
+| # | Sub-Flag | Description |
+|---|----------|-------------|
+| 11 | **Identity Resolution** | Cross-reference digital evidence to identify the insider |
+| 12 | **Geo-Location Intel** | Extract hidden intelligence from recovered media (EXIF) |
+| 13 | **Data Decryption** | Crack credentials and decrypt the stolen data archive |
+
+The Phantom Insider lab is a grouped, multi-stage OSINT investigation where you uncover a corporate insider threat using chat logs, blog snapshots, employee directories, image metadata, breach dumps, and encrypted archives.
+
 ### Scoring
 
-- **Base Points**: 100 points per challenge
-- **Hint Penalty**: -20 points per hint used
-- **Maximum Score**: 1000 points (all challenges, no hints)
+- **Base Points**: 100 points per flag (13 flags total)
+- **Hint Penalty**: -20 points per hint used (3 hints available per challenge)
+- **Maximum Score**: 1,300 points (all challenges, no hints)
 
 ---
 
@@ -158,16 +232,16 @@ The main dashboard displays:
 - **Header**: User info, theme toggle, logout button
 - **Progress Panel**: Score, timer, progress bar
 - **Flag Submission**: Input field to submit flags
-- **Challenge Grid**: All 10 challenges with status badges
-- **Footer**: Export progress link
+- **Challenge Grid**: All 11 labs with status badges (Locked / Partial / Solved)
+- **Footer**: Leaderboard and export progress links
 
 ### Solving a Challenge
 
-1. **Click "Start"** on a challenge card
+1. **Click "Start"** (or **"Investigate"** for the OSINT lab) on a challenge card
 2. **Explore** the vulnerable application
 3. **Exploit** the vulnerability to find the flag
 4. **Return** to the dashboard
-5. **Submit** the flag in the format `CTF{...}`
+5. **Submit** the flag in the format `CTF{...}` or `PI{...}`
 6. **View Writeup** (unlocked after solving)
 
 ### Using Hints
@@ -175,7 +249,7 @@ The main dashboard displays:
 1. On any challenge page, click **"Get Hint"**
 2. Each challenge has **3 levels** of hints
 3. Each hint costs **-20 points**
-4. Hints are revealed progressively
+4. Hints are persistent — they remain visible even if you navigate away
 
 ### Viewing Writeups
 
@@ -183,17 +257,19 @@ The main dashboard displays:
 2. Click the **"Writeup"** button on the challenge card
 3. Read the detailed analysis, exploitation steps, and remediation advice
 
-### Exporting Progress
+### Completion Certificate
 
-1. Scroll to the footer
-2. Click **"Download Progress Report (JSON)"**
-3. A JSON file will download with your progress
+When all 13 flags are captured:
+1. A fullscreen celebration appears with confetti 🎉
+2. A personalized **Certificate of Excellence** is displayed with your name, score, and date
+3. Click **"Download Certificate"** to save a high-resolution PNG
+4. Links to the AquilaCyber website and WhatsApp community are provided
 
 ### Keyboard Shortcuts
 
-- `Ctrl+J` - Toggle dark/light mode
-- `Ctrl+Enter` - Submit flag (when input is focused)
-- `Esc` - Close modals
+- `Ctrl+J` — Toggle dark/light mode
+- `Ctrl+Enter` — Submit flag (when input is focused)
+- `Esc` — Close modals
 
 ---
 
@@ -201,37 +277,66 @@ The main dashboard displays:
 
 ```
 aquila_ctf/
-├── server.js                 # Main server file
-├── database.js              # Database wrapper (AlaSQL)
-├── package.json             # Dependencies
-├── aquila.json             # Database file (auto-generated)
+├── server.js                 # Main server (auto-generates flag files on startup)
+├── database.js               # Database wrapper (AlaSQL with JSON persistence)
+├── package.json              # Dependencies
+├── Dockerfile                # Multi-stage Docker build
+├── docker-compose.yml        # Docker Compose configuration
+├── .env.example              # Environment variable template
+│
+├── config/
+│   └── challenges.js         # Challenge metadata & card builder
+│
+├── middleware/
+│   └── auth.js               # Authentication middleware
 │
 ├── routes/
-│   ├── auth.js             # Authentication routes
-│   └── challenges.js       # Challenge routes
+│   ├── auth.js               # Authentication routes (login/register/logout)
+│   ├── api.js                # API routes (submit, hints, writeups, leaderboard)
+│   └── challenges.js         # Challenge routes (all 13 challenges)
 │
 ├── views/
-│   ├── index.ejs           # Dashboard
-│   ├── auth_login.ejs      # Login page
-│   ├── register.ejs        # Registration page
-│   ├── writeup.ejs         # Writeup template
-│   ├── login.ejs           # Challenge 1: SQL Injection
-│   ├── search.ejs          # Challenge 2: XSS
-│   ├── profile.ejs         # Challenge 3: IDOR
-│   ├── ping.ejs            # Challenge 4: Command Injection
-│   ├── vault.ejs           # Challenge 5: JWT Bypass
-│   ├── calculator.ejs      # Challenge 6: RCE
-│   ├── csrf.ejs            # Challenge 7: CSRF
-│   ├── upload.ejs          # Challenge 8: File Upload
-│   ├── xxe.ejs             # Challenge 9: XXE
-│   └── ssrf.ejs            # Challenge 10: SSRF
+│   ├── index.ejs             # Dashboard
+│   ├── auth_login.ejs        # Login page
+│   ├── register.ejs          # Registration page
+│   ├── leaderboard.ejs       # Leaderboard page
+│   ├── writeup.ejs           # Writeup template
+│   ├── error.ejs             # Error page
+│   ├── phantom-insider.ejs   # OSINT Lab (Challenges 11-13)
+│   ├── login.ejs             # Challenge 1: SQL Injection
+│   ├── search.ejs            # Challenge 2: XSS
+│   ├── profile.ejs           # Challenge 3: IDOR
+│   ├── ping.ejs              # Challenge 4: Command Injection
+│   ├── vault.ejs             # Challenge 5: JWT Bypass
+│   ├── calculator.ejs        # Challenge 6: RCE
+│   ├── csrf.ejs              # Challenge 7: CSRF
+│   ├── upload.ejs            # Challenge 8: File Upload
+│   ├── xxe.ejs               # Challenge 9: XXE
+│   ├── ssrf.ejs              # Challenge 10: SSRF
+│   └── partials/
+│       └── hint_script.ejs   # Reusable hint UI component
+│
+├── phantom-insider/
+│   ├── generate.js           # Evidence file generator (meetup_spot.jpg, stolen_data.zip)
+│   ├── meetup_base.png       # Base image for EXIF injection
+│   └── static/               # Pre-generated evidence files served at /phantom-lab/
+│       ├── index.html         # Lab landing page
+│       ├── chatter_archive.html
+│       ├── blog_snapshot.html
+│       ├── NexaCorp_Directory.csv
+│       ├── breach_dump_2024.txt
+│       ├── meetup_spot.jpg    # Contains EXIF flag
+│       ├── stolen_data.zip    # Password-protected archive
+│       └── E-8931.html        # Suspect profile page
+│
+├── data/
+│   └── writeups.js           # Writeup content for all challenges
 │
 ├── public/
-│   ├── style.css           # Main stylesheet
-│   └── uploads/            # File upload directory
+│   ├── style.css             # Main stylesheet
+│   └── theme.js              # Theme persistence script
 │
-└── data/
-    └── writeups.js         # Writeup content
+└── uploads/                  # File upload directory (Challenge 8)
 ```
 
 ---
@@ -239,58 +344,67 @@ aquila_ctf/
 ## 🛠️ Technologies
 
 ### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **AlaSQL** - In-memory SQL database with JSON persistence
-- **bcryptjs** - Password hashing
-- **express-session** - Session management
+- **Node.js** — Runtime environment
+- **Express.js 5** — Web framework
+- **AlaSQL** — In-memory SQL database with JSON persistence
+- **bcryptjs** — Password hashing
+- **express-session** — Session management
+- **sharp** — Image processing (EXIF injection for OSINT lab)
 
 ### Frontend
-- **EJS** - Templating engine
-- **Vanilla CSS** - Styling with CSS variables
-- **Vanilla JavaScript** - Client-side interactivity
-- **Web Audio API** - Sound effects
+- **EJS** — Templating engine
+- **Vanilla CSS** — Styling with CSS variables and glassmorphism
+- **Vanilla JavaScript** — Client-side interactivity
+- **Web Audio API** — Sound effects
+- **html2canvas** — Certificate generation
+- **canvas-confetti** — Completion celebration
 
 ### Security (Platform)
-- **bcrypt** - Password hashing (10 salt rounds)
-- **Session-based authentication** - Secure session management
-- **Parameterized queries** - SQL injection prevention (where appropriate)
+- **bcrypt** — Password hashing (10 salt rounds)
+- **Session-based authentication** — Secure session management
+- **VM Sandbox** — Isolated code execution for Calculator challenge
+- **WAF Filtering** — Regex-based protection against cross-challenge exploitation
+- **Filesystem Isolation** — Sandboxed working directory for command injection
 
 ---
 
 ## ⚙️ Configuration
 
-### Environment Variables (Optional)
+### Environment Variables
 
-For production use (not recommended for this CTF), you can set:
+Copy `.env.example` to `.env` and customize:
 
 ```bash
 # Session secret
 SESSION_SECRET=your_secret_key_here
 
+# JWT secret for Challenge 5
+JWT_SECRET=super_secret_jwt_key
+
 # Port
 PORT=3000
-```
 
-### Session Configuration
-
-Default session settings in `server.js`:
-```javascript
-{
-    secret: 'super_secret_session_key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
-}
+# Database path
+DB_PATH=./aquila.json
 ```
 
 ### Database
 
 - **Type**: AlaSQL (in-memory with file persistence)
-- **File**: `aquila.json` (auto-created)
-- **Location**: Project root directory
+- **File**: `aquila.json` (auto-created on first run)
+- **Location**: Project root (or `DB_PATH` if set)
 
-To reset the database, simply delete `aquila.json` and restart the server.
+To reset all data, delete `aquila.json` and restart the server.
+
+### Regenerating OSINT Evidence
+
+If you need to regenerate the Phantom Insider evidence files:
+
+```bash
+node phantom-insider/generate.js
+```
+
+> **Note**: Requires `sharp` to be installed. The generator creates `meetup_spot.jpg` (with EXIF flag) and `stolen_data.zip` (password-protected archive).
 
 ---
 
@@ -317,11 +431,11 @@ lsof -ti:3000 | xargs kill -9
 **Solution**:
 ```bash
 # Delete the database file
-rm aquila.json  # Linux/Mac
-del aquila.json  # Windows
+rm aquila.json    # Linux/Mac
+del aquila.json   # Windows
 
 # Restart the server
-node server.js
+npm start
 ```
 
 ### Session issues
@@ -342,6 +456,21 @@ node server.js
 npm install
 ```
 
+### OSINT Lab images not loading
+
+**Problem**: `meetup_spot.jpg` is missing or empty
+
+**Solution**:
+```bash
+node phantom-insider/generate.js
+```
+
+### Command Injection not showing full output
+
+**Problem**: Ping output is truncated
+
+**Solution**: The command execution has a 10-second timeout. If the target IP is unreachable, Windows may take longer to respond. Use `127.0.0.1` for reliable results.
+
 ---
 
 ## 🎓 Learning Resources
@@ -361,12 +490,13 @@ npm install
 - **JWT**: [JWT.io](https://jwt.io/)
 - **XXE**: [OWASP XXE](https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing)
 - **SSRF**: [OWASP SSRF](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery)
+- **OSINT**: [OSINT Framework](https://osintframework.com/)
 
 ---
 
 ## 🤝 Contributing
 
-This is an educational project. If you'd like to contribute:
+This is an educational project by the AquilaCyber community. If you'd like to contribute:
 
 1. Fork the repository
 2. Create a feature branch
@@ -376,11 +506,11 @@ This is an educational project. If you'd like to contribute:
 
 ### Ideas for Contributions
 
-- Additional challenges
-- Improved writeups
-- UI/UX enhancements
-- Bug fixes
-- Documentation improvements
+- Additional challenges (e.g., Deserialization, Prototype Pollution)
+- Improved writeups with diagrams
+- Mobile-responsive UI enhancements
+- Docker Compose multi-service setups
+- Bug fixes and documentation improvements
 
 ---
 

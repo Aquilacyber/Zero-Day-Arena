@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phantom Insider - OSINT Investigation</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/theme.js"></script>
+    <style>
+        .mission-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .mission-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .mission-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            background: rgba(255, 23, 68, 0.15);
+            border: 1px solid rgba(255, 23, 68, 0.4);
+            border-radius: 20px;
+            color: var(--danger);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .storyline {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 24px;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        .storyline strong { color: var(--accent); }
+        .storyline .suspect { color: #ff6600; font-weight: 700; }
+
+        .objectives-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .objective-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .objective-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.05);
+        }
+        .objective-num {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+        .objective-card.solved .objective-num {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.4);
+            color: var(--success);
+        }
+        .objective-info h4 {
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+        .objective-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .objective-status {
+            margin-left: auto;
+            flex-shrink: 0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-locked {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+        .status-solved {
+            background: rgba(0, 255, 136, 0.12);
+            color: var(--success);
+        }
+
+        .launch-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .launch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(184, 41, 234, 0.15));
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            font-family: var(--font-sans);
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .launch-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.25), rgba(184, 41, 234, 0.25));
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .hint-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .hint-panel {
+            padding: 20px;
+            background: rgba(255, 170, 0, 0.08);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+            border-radius: 8px;
+        }
+        .hint-panel h4 {
+            color: var(--warning);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .objective-card { flex-wrap: wrap; }
+            .objective-status { margin-left: 0; margin-top: 8px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="mission-header">
+            <span class="mission-badge">🔴 Active Investigation</span>
+            <h1>Phantom Insider</h1>
+            <p style="color: var(--text-secondary);">OSINT Investigation — Multi-Flag Challenge (300 pts)</p>
+        </div>
+
+        <div class="storyline">
+            <strong>CLASSIFIED BRIEFING:</strong> NexaCorp has experienced a catastrophic data leak. Intellectual property was stolen from deep within the R&D network. The only clue left behind is a taunting message posted on an anonymous hacker forum by the handle <span class="suspect">"Wraith_99"</span>. The Incident Response team managed to scrape the forum, the user's linked personal blog, and a segment of a known data breach database before they were taken down. They've hosted this scraped digital footprint on a local investigation server for you.
+        </div>
+
+        <h3 style="margin-bottom: 16px;">🎯 Mission Objectives</h3>
+        <div class="objectives-grid">
+            <div class="objective-card <%= subFlags[0].solved ? 'solved' : '' %>">
+                <div class="objective-num">1</div>
+                <div class="objective-info">
+                    <h4>Identity Resolution</h4>
+                    <p>Cross-reference social scrapes with the employee directory to identify the insider.</p>
+                </div>
+                <span class="objective-status <%= subFlags[0].solved ? 'status-solved' : 'status-locked' %>">
+                    <%= subFlags[0].solved ? '✓ Captured' : 'Pending' %>
+                </span>
+            </div>
+            <div class="objective-card <%= subFlags[1].solved ? 'solved' : '' %>">
+                <div class="objective-num">2</div>
+                <div class="objective-info">
+                    <h4>Geo-Location Intelligence</h4>
+                    <p>Analyze recovered media for hidden location metadata.</p>
+                </div>
+                <span class="objective-status <%= subFlags[1].solved ? 'status-solved' : 'status-locked' %>">
+                    <%= subFlags[1].solved ? '✓ Captured' : 'Pending' %>
+                </span>
+            </div>
+            <div class="objective-card <%= subFlags[2].solved ? 'solved' : '' %>">
+                <div class="objective-num">3</div>
+                <div class="objective-info">
+                    <h4>Data Decryption</h4>
+                    <p>Crack compromised credentials and extract the stolen archive.</p>
+                </div>
+                <span class="objective-status <%= subFlags[2].solved ? 'status-solved' : 'status-locked' %>">
+                    <%= subFlags[2].solved ? '✓ Captured' : 'Pending' %>
+                </span>
+            </div>
+        </div>
+
+        <div class="launch-section">
+            <a href="/phantom-lab/" class="launch-btn" target="_blank">
+                🖥️ Launch Investigation Server
+            </a>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px;">Opens the Evidence Archive in a new tab</p>
+        </div>
+
+        <div class="glass-panel" style="margin-top: 30px; padding: 20px;">
+            <h3 style="margin-bottom: 16px;">💡 Hints</h3>
+            <div class="hint-sections">
+                <div class="hint-panel">
+                    <h4>Flag 1 — Identity</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">-20 pts per hint</span>
+                        <button id="getHintBtn" class="btn" style="border-color: var(--warning); color: var(--warning); padding: 4px 10px; font-size: 0.8rem;" data-challenge-id="11">Get Hint</button>
+                    </div>
+                    <div id="hintContainer">
+                        <p style="opacity: 0.5; margin: 0; font-size: 0.85rem;">Progressive hints available.</p>
+                    </div>
+                </div>
+                <div class="hint-panel">
+                    <h4>Flag 2 — Location</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">-20 pts per hint</span>
+                        <button id="getHintBtn2" class="btn" style="border-color: var(--warning); color: var(--warning); padding: 4px 10px; font-size: 0.8rem;" data-challenge-id="12">Get Hint</button>
+                    </div>
+                    <div id="hintContainer2">
+                        <p style="opacity: 0.5; margin: 0; font-size: 0.85rem;">Progressive hints available.</p>
+                    </div>
+                </div>
+                <div class="hint-panel">
+                    <h4>Flag 3 — Decryption</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">-20 pts per hint</span>
+                        <button id="getHintBtn3" class="btn" style="border-color: var(--warning); color: var(--warning); padding: 4px 10px; font-size: 0.8rem;" data-challenge-id="13">Get Hint</button>
+                    </div>
+                    <div id="hintContainer3">
+                        <p style="opacity: 0.5; margin: 0; font-size: 0.85rem;">Progressive hints available.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('partials/modal') %>
+        <script>
+            // Multi-hint handler for 3 hint sections — with persistence
+            async function setupHintBtn(btnId, containerId) {
+                const btn = document.getElementById(btnId);
+                if (!btn) return;
+                const container = document.getElementById(containerId);
+                const challengeId = btn.getAttribute('data-challenge-id');
+
+                // Load previously purchased hints on page load
+                try {
+                    const loadRes = await fetch(`/hints/${challengeId}`);
+                    const loadData = await loadRes.json();
+
+                    if (loadData.hints && loadData.hints.length > 0) {
+                        loadData.hints.forEach(h => {
+                            const hintHtml = `
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(234, 179, 8, 0.1); border-left: 3px solid var(--warning); border-radius: 0 4px 4px 0;">
+                                    <strong style="color: var(--warning); display: block; margin-bottom: 4px; font-size: 0.8rem;">HINT ${h.level}</strong>
+                                    <p style="margin: 0; font-size: 0.9rem;">${h.hint}</p>
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', hintHtml);
+                        });
+
+                        if (loadData.hintsRemaining > 0) {
+                            btn.textContent = 'Next Hint';
+                        } else {
+                            btn.textContent = 'No more';
+                            btn.disabled = true;
+                        }
+                    }
+                } catch (e) { /* silent */ }
+
+                // Handle new hint purchases
+                btn.addEventListener('click', async function() {
+                    const confirmed = await AquilaModal.confirm('This will cost 20 points. Use a hint?', {
+                        title: 'Use Hint?',
+                        icon: '💡',
+                        confirmText: 'Use Hint (-20 pts)',
+                        cancelText: 'Keep Points',
+                        btnClass: 'warning'
+                    });
+                    if (!confirmed) return;
+
+                    btn.disabled = true;
+                    btn.textContent = 'Loading...';
+
+                    try {
+                        const res = await fetch('/hint', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ challengeId: parseInt(challengeId) })
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            const hintHtml = `
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(234, 179, 8, 0.1); border-left: 3px solid var(--warning); border-radius: 0 4px 4px 0;">
+                                    <strong style="color: var(--warning); display: block; margin-bottom: 4px; font-size: 0.8rem;">HINT ${data.level}</strong>
+                                    <p style="margin: 0; font-size: 0.9rem;">${data.hint}</p>
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', hintHtml);
+                            if (data.hintsRemaining > 0) {
+                                btn.disabled = false;
+                                btn.textContent = 'Next Hint';
+                            } else {
+                                btn.textContent = 'No more';
+                            }
+                        } else {
+                            await AquilaModal.alert(data.message, { type: 'warning' });
+                            btn.disabled = false;
+                            btn.textContent = 'Get Hint';
+                        }
+                    } catch (err) {
+                        await AquilaModal.alert('Could not fetch hint.', { type: 'error' });
+                        btn.disabled = false;
+                        btn.textContent = 'Get Hint';
+                    }
+                });
+            }
+
+            setupHintBtn('getHintBtn', 'hintContainer');
+            setupHintBtn('getHintBtn2', 'hintContainer2');
+            setupHintBtn('getHintBtn3', 'hintContainer3');
+        </script>
+
+        <a href="/" class="btn" style="margin-top: 20px;">← Back to Dashboard</a>
+    </div>
+</body>
+
+</html>

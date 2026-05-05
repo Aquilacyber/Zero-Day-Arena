@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aegis - Digital Evidence Archive</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a0a;
+            color: #00ff41;
+            min-height: 100vh;
+            padding: 40px;
+        }
+        .header {
+            border-bottom: 1px solid #00ff41;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        .warning {
+            color: #ff3333;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .brief { color: #88cc88; line-height: 1.6; max-width: 800px; }
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .item {
+            padding: 20px;
+            border: 1px solid #1a3a1a;
+            background: #0d1a0d;
+            transition: all 0.3s ease;
+        }
+        .item:hover {
+            border-color: #00ff41;
+            background: #0f2a0f;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+        }
+        .item h3 {
+            color: #00ff41;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .item p {
+            color: #669966;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        a {
+            color: #00ccff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 4px 8px;
+            border: 1px solid #00ccff;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+        a:hover {
+            background: #00ccff;
+            color: #000;
+        }
+        .item em { color: #888; font-size: 0.8rem; }
+        .scan-line {
+            position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 255, 65, 0.3);
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    <div class="header">
+        <h1>Digital Evidence Archive — Case #774-A</h1>
+        <p class="warning">⚠ CLASSIFIED OSINT REPOSITORY — AUTHORIZED PERSONNEL ONLY</p>
+        <p class="brief">NexaCorp has experienced a catastrophic data leak. The only clue is a taunting message by the handle <strong style="color:#ff6600;">"Wraith_99"</strong>. The Incident Response team scraped the suspect's digital footprint before it was taken down. Your objective: profile the suspect, uncover their identity, and decrypt the stolen archive.</p>
+    </div>
+
+    <div class="evidence-grid">
+        <div class="item">
+            <h3>📋 1. Social Scrape: Chatter Forum</h3>
+            <p>A scrape of the hacker forum where Wraith_99 first bragged about the breach.</p>
+            <a href="chatter_archive.html">[View chatter_archive.html]</a>
+        </div>
+
+        <div class="item">
+            <h3>📝 2. Social Scrape: Personal Blog</h3>
+            <p>A superficial tech blog linked to the suspect's forum account.</p>
+            <a href="blog_snapshot.html">[View blog_snapshot.html]</a>
+        </div>
+
+        <div class="item">
+            <h3>🏢 3. NexaCorp Employee Directory</h3>
+            <p>Public employee mapping for cross-reference against the suspect profile.</p>
+            <a href="NexaCorp_Directory.csv">[Download NexaCorp_Directory.csv]</a>
+            <br><br>
+            <em>Tip: If you identify the Employee ID (e.g., E-1234), try accessing /phantom-lab/E-1234.html</em>
+        </div>
+
+        <div class="item">
+            <h3>🔓 4. DarkWeb Breach Dump (2024)</h3>
+            <p>A known breach database dump. The suspect may be reusing credentials.</p>
+            <a href="breach_dump_2024.txt">[Download breach_dump_2024.txt]</a>
+        </div>
+
+        <div class="item">
+            <h3>📦 5. Encrypted Stolen Data</h3>
+            <p>A password-protected ZIP archive recovered from the suspect's cloud drive.</p>
+            <a href="stolen_data.zip">[Download stolen_data.zip]</a>
+        </div>
+    </div>
+</body>
+</html>

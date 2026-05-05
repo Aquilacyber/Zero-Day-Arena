@@ -1,0 +1,9 @@
+darkweb_breach_repo_2024
+format: username:md5_hash
+
+johndoe:5f4dcc3b5aa765d61d8327deb882cf99
+alice21:d8578edf8458ce06fbc5bb76a58c5ca4
+wraith_99:e1a04996a37395fcd9c7b7c5286270f7
+bigboss:0192023a7bbd73250516f069df18b500
+cyberninja:6f1ed002ab5595859014ebf0951522d9
+shadowfox:e10adc3949ba59abbe56e057f20f883e

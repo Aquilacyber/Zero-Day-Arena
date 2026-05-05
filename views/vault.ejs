@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Vault</title>
     <link rel="stylesheet" href="/style.css">
+    <script src="/theme.js"></script>
 </head>
 
 <body>
@@ -45,11 +47,17 @@
                     </div>
         </div>
 
-        <div class="glass-panel">
-            <span class="hint-title">💡 MISSION HINT</span>
-            <p style="opacity: 0.8; margin: 0;">Your session is managed by a JWT cookie. Can you forge a token with
-                <code>"alg": "none"</code> to become an admin?</p>
+        <div class="glass-panel" style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span class="hint-title" style="font-weight: 600; color: var(--warning);">💡 MISSION HINT</span>
+                <button id="getHintBtn" class="btn" style="border-color: var(--warning); color: var(--warning); padding: 6px 12px; font-size: 0.85rem;" data-challenge-id="5">Get Hint (-20 pts)</button>
+            </div>
+            <div id="hintContainer">
+                <p style="opacity: 0.6; margin: 0; font-size: 0.9rem;">Hints are progressive. Using a hint reduces your maximum possible score.</p>
+            </div>
         </div>
+
+        <%- include('partials/hint_script') %>
     </div>
 </body>
 

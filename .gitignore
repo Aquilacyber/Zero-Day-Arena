@@ -5,3 +5,28 @@ aquila.json
 .DS_Store
 uploads/*
 !uploads/.gitkeep
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# Gemini
+.gemini/
+
+# Phantom Insider temp build artifacts
+phantom-insider/_tmp_gen/
+
+# Flag files (generated at deploy time by Dockerfile)
+flag_calc.txt
+flag_xxe.txt
+ping_sandbox/
+aquila.json
+
+# Legacy lockfile (using npm now)
+pnpm-lock.yaml

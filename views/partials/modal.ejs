@@ -1,0 +1,201 @@
+<!-- Shared Modal Component -->
+<div id="aquilaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+    <div id="aquilaModalContent" style="background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; padding: 32px; max-width: 420px; width: 90%; position: relative; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); animation: modalSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        
+        <!-- Modal Icon -->
+        <div id="aquilaModalIcon" style="text-align: center; font-size: 2.5rem; margin-bottom: 16px;"></div>
+        
+        <!-- Modal Title -->
+        <h3 id="aquilaModalTitle" style="text-align: center; margin: 0 0 12px 0; font-size: 1.2rem; color: var(--text-primary);"></h3>
+        
+        <!-- Modal Message -->
+        <p id="aquilaModalMessage" style="text-align: center; color: var(--text-secondary); margin: 0 0 28px 0; font-size: 0.95rem; line-height: 1.5;"></p>
+        
+        <!-- Modal Actions -->
+        <div id="aquilaModalActions" style="display: flex; gap: 10px; justify-content: center;"></div>
+    </div>
+</div>
+
+<style>
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    @keyframes modalSlideOut {
+        from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+        }
+    }
+    .modal-btn {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: var(--font-sans);
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-secondary);
+    }
+    .modal-btn:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+    .modal-btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-purple));
+        color: #fff;
+        border: none;
+    }
+    .modal-btn-primary:hover {
+        box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+        transform: translateY(-1px);
+        color: #fff;
+    }
+    .modal-btn-danger {
+        background: rgba(255, 23, 68, 0.15);
+        color: var(--danger);
+        border-color: rgba(255, 23, 68, 0.3);
+    }
+    .modal-btn-danger:hover {
+        background: rgba(255, 23, 68, 0.25);
+    }
+    .modal-btn-warning {
+        background: rgba(255, 234, 0, 0.1);
+        color: var(--warning);
+        border-color: rgba(255, 234, 0, 0.3);
+    }
+    .modal-btn-warning:hover {
+        background: rgba(255, 234, 0, 0.2);
+    }
+</style>
+
+<script>
+    // ============================================================
+    // Aquila Modal System — Replaces native alert() and confirm()
+    // ============================================================
+    const AquilaModal = {
+        _modal: null,
+        _content: null,
+        _resolvePromise: null,
+
+        _init() {
+            this._modal = document.getElementById('aquilaModal');
+            this._content = document.getElementById('aquilaModalContent');
+            
+            // Close on backdrop click
+            this._modal.addEventListener('click', (e) => {
+                if (e.target === this._modal) {
+                    this.close(false);
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this._modal.style.display === 'flex') {
+                    this.close(false);
+                }
+            });
+        },
+
+        /**
+         * Show an alert-style modal (single OK button)
+         * @param {string} message - Message to display
+         * @param {object} opts - { title, icon, type: 'info'|'success'|'error'|'warning' }
+         * @returns {Promise<void>}
+         */
+        alert(message, opts = {}) {
+            const type = opts.type || 'info';
+            const icons = { info: '💬', success: '✅', error: '❌', warning: '⚠️' };
+            const titles = { info: 'Notice', success: 'Success', error: 'Error', warning: 'Warning' };
+
+            return new Promise((resolve) => {
+                this._resolvePromise = resolve;
+                document.getElementById('aquilaModalIcon').textContent = opts.icon || icons[type];
+                document.getElementById('aquilaModalTitle').textContent = opts.title || titles[type];
+                document.getElementById('aquilaModalMessage').textContent = message;
+                
+                const actionsEl = document.getElementById('aquilaModalActions');
+                actionsEl.innerHTML = '';
+                
+                const okBtn = document.createElement('button');
+                okBtn.className = 'modal-btn modal-btn-primary';
+                okBtn.textContent = 'OK';
+                okBtn.onclick = () => this.close(true);
+                actionsEl.appendChild(okBtn);
+
+                this._modal.style.display = 'flex';
+                okBtn.focus();
+            });
+        },
+
+        /**
+         * Show a confirm-style modal (Cancel + Confirm buttons)
+         * @param {string} message - Message to display
+         * @param {object} opts - { title, icon, confirmText, cancelText, type }
+         * @returns {Promise<boolean>}
+         */
+        confirm(message, opts = {}) {
+            const type = opts.type || 'warning';
+            const icons = { info: '💬', success: '✅', error: '❌', warning: '⚠️' };
+
+            return new Promise((resolve) => {
+                this._resolvePromise = resolve;
+                document.getElementById('aquilaModalIcon').textContent = opts.icon || icons[type];
+                document.getElementById('aquilaModalTitle').textContent = opts.title || 'Confirm Action';
+                document.getElementById('aquilaModalMessage').textContent = message;
+                
+                const actionsEl = document.getElementById('aquilaModalActions');
+                actionsEl.innerHTML = '';
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'modal-btn';
+                cancelBtn.textContent = opts.cancelText || 'Cancel';
+                cancelBtn.onclick = () => this.close(false);
+                actionsEl.appendChild(cancelBtn);
+                
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'modal-btn modal-btn-' + (opts.btnClass || 'warning');
+                confirmBtn.textContent = opts.confirmText || 'Confirm';
+                confirmBtn.onclick = () => this.close(true);
+                actionsEl.appendChild(confirmBtn);
+
+                this._modal.style.display = 'flex';
+                confirmBtn.focus();
+            });
+        },
+
+        close(result) {
+            if (this._content) {
+                this._content.style.animation = 'modalSlideOut 0.2s ease forwards';
+                setTimeout(() => {
+                    this._modal.style.display = 'none';
+                    this._content.style.animation = 'modalSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    if (this._resolvePromise) {
+                        this._resolvePromise(result);
+                        this._resolvePromise = null;
+                    }
+                }, 200);
+            }
+        }
+    };
+
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => AquilaModal._init());
+    } else {
+        AquilaModal._init();
+    }
+</script>

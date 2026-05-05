@@ -1,0 +1,36 @@
+# ============================================================
+# AquilaCyber CTF Platform — Docker Compose
+# ============================================================
+# Usage:
+#   Start:   docker compose up --build
+#   Stop:    docker compose down
+#   Reset:   docker compose down -v  (removes all data)
+# ============================================================
+
+services:
+  aquila-ctf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aquila-ctf
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-3000}
+      - SESSION_SECRET=${SESSION_SECRET:-super_secret_session_key}
+      - JWT_SECRET=${JWT_SECRET:-super_secret_jwt_key}
+      - DB_PATH=${DB_PATH:-/app/data-persist/aquila.json}
+    volumes:
+      - ctf-data:/app/data-persist      # Database persistence (aquila.json)
+      - ctf-uploads:/app/uploads         # Uploaded files persistence
+    restart: unless-stopped
+    mem_limit: 512m
+
+volumes:
+  ctf-data:
+    driver: local
+  ctf-uploads:
+    driver: local

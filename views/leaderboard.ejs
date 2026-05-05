@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .leaderboard-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .leaderboard-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: bold;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        .rank-1 { background: #ffd700; color: #000; }
+        .rank-2 { background: #c0c0c0; color: #000; }
+        .rank-3 { background: #cd7f32; color: #000; }
+        .current-user {
+            background-color: rgba(56, 189, 248, 0.1) !important;
+        }
+    </style>
+    <script src="/theme.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; display: flex; align-items: center; gap: 12px;">
+                    🏆 Global Leaderboard
+                </h1>
+                <p style="color: var(--text-secondary); margin-top: 8px;">Top security researchers by score</p>
+            </div>
+            <a href="/" class="btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="glass-panel">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th width="80">Rank</th>
+                        <th>Hacker</th>
+                        <th>Score</th>
+                        <th>Solved</th>
+                        <th>Hints Used</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% leaderboard.forEach((user, index) => { %>
+                        <tr class="<%= user.username === currentUser ? 'current-user' : '' %>">
+                            <td>
+                                <span class="rank-badge <%= [0, 1, 2].includes(index) ? 'rank-' + (index + 1) : '' %>">
+                                    <%= index + 1 %>
+                                </span>
+                            </td>
+                            <td <%- 'style="font-weight: 600; color: ' + (user.username === currentUser ? 'var(--accent)' : 'inherit') + ';"' %>>
+                                <%= user.username %>
+                                <% if (user.username === currentUser) { %>
+                                    <span style="font-size: 0.75rem; color: var(--accent); margin-left: 8px;">(You)</span>
+                                <% } %>
+                            </td>
+                            <td style="color: var(--accent); font-weight: bold; font-family: var(--font-mono); font-size: 1.1rem;">
+                                <%= user.score %>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden; max-width: 100px;">
+                                        <div <%- 'style="height: 100%; width: ' + ((user.solved / totalChallenges) * 100) + '%; background: var(--success);"' %>></div>
+                                    </div>
+                                    <span style="font-size: 0.9rem; color: var(--text-secondary);"><%= user.solved %>/<%= totalChallenges %></span>
+                                </div>
+                            </td>
+                            <td style="color: var(--warning); font-family: var(--font-mono);">
+                                <%= user.hintsUsed %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                    <% if (leaderboard.length === 0) { %>
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">No hackers registered yet.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
