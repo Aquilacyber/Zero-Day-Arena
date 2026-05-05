@@ -8,6 +8,25 @@ A modern, feature-rich Capture The Flag (CTF) platform designed for learning web
 
 ---
 
+## 📸 Screenshots
+
+### Dashboard
+> The main hub — challenge grid, live progress tracking, and flag submission.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Phantom Insider — OSINT Lab
+> A multi-stage corporate insider threat investigation with digital evidence analysis.
+
+![Phantom Insider](docs/screenshots/phantom-insider.png)
+
+### Calculator RCE Lab
+> Exploit dangerous code evaluation.
+
+![Calculator](docs/screenshots/calculator.png)
+
+---
+
 ## ⚠️ Security Warning
 
 **DO NOT DEPLOY TO PRODUCTION OR EXPOSE TO THE INTERNET**
