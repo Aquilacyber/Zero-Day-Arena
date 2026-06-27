@@ -9,7 +9,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-4',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 4,
+    challengeName: 'Ping Tool',
+    challengeType: 'Cmd Injection',
+    challengeDifficulty: 'Medium',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
 

@@ -30,3 +30,7 @@ aquila.json
 
 # Legacy lockfile (using npm now)
 pnpm-lock.yaml
+
+# Dev Docker local data dirs
+dev-data/
+dev-uploads/

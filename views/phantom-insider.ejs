@@ -162,7 +162,24 @@
     </style>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-11',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 11,
+    challengeName: 'Phantom Insider',
+    challengeType: 'OSINT',
+    challengeDifficulty: 'Hard',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <div class="mission-header">
             <span class="mission-badge">🔴 Active Investigation</span>

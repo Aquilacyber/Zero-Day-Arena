@@ -1,416 +1,531 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <script>/* inline theme - no FOUC */
+    (function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+    </script>
+    <!-- inline theme -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <%= title %>
-    </title>
+    <title><%= title %> — Dashboard</title>
     <link rel="stylesheet" href="/style.css">
-    <script src="/theme.js"></script>
 </head>
+<body class="has-nav">
 
-<body>
-    <div class="container">
-        <header style="margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center;">
+<%- include('partials/nav', {
+    user: user,
+    score: score,
+    currentPage: 'dashboard',
+    isAdmin: isAdmin
+}) %>
+
+<%- include('partials/modal') %>
+
+<div class="container">
+
+    <!-- ── Event Banner ─────────────────────────────────────── -->
+    <% if (event.mode === 'ended') { %>
+    <div class="glass-panel fade-in" style="margin-bottom:18px;border-color:rgba(255,23,68,0.35);background:rgba(255,23,68,0.05);">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.4rem;">🏁</span>
             <div>
-                <h1>AQUILA CTF</h1>
-                <p style="color: var(--text-secondary); font-size: 0.95rem;">Web Application Security Assessment
-                    Platform</p>
+                <div style="font-weight:800;color:var(--danger);font-size:0.92rem;letter-spacing:0.5px;">EVENT ENDED — FINAL SCORES LOCKED</div>
+                <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">Flag submissions are closed. <a href="/leaderboard" style="color:var(--danger);">View final leaderboard →</a></div>
             </div>
-            <div style="text-align: right; display: flex; align-items: center; gap: 16px;">
-                <button id="themeToggle" class="theme-toggle" title="Toggle Theme (Ctrl+J)">
-                    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" style="display: none;">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </button>
-                <div style="margin-bottom: 0;">
-                    <span style="color: var(--text-muted); font-size: 0.85rem;">Logged in as:</span>
-                    <span
-                        style="color: var(--accent); font-family: var(--font-mono); font-weight: 600; font-size: 0.9rem;">
-                        <%= user %>
-                    </span>
-                </div>
-                <a href="/auth/logout" class="btn"
-                    style="padding: 6px 16px; font-size: 0.8rem; border-color: var(--border); color: var(--text-secondary);">Logout</a>
+        </div>
+    </div>
+    <% } else if (event.mode === 'scheduled') { %>
+    <div class="glass-panel fade-in" style="margin-bottom:18px;border-color:rgba(255,152,0,0.35);background:rgba(255,152,0,0.04);">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.4rem;">⏳</span>
+            <div>
+                <div style="font-weight:800;color:var(--warning);font-size:0.92rem;">EVENT STARTS IN <span id="countdownBanner" style="font-family:var(--font-mono);">--:--:--</span></div>
+                <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">Flag submissions open when the countdown hits zero. Get ready.</div>
             </div>
-        </header>
+        </div>
+    </div>
+    <% } else if (event.isFrozen) { %>
+    <div class="glass-panel fade-in" style="margin-bottom:18px;border-color:rgba(56,189,248,0.3);background:rgba(56,189,248,0.04);">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.4rem;">❄️</span>
+            <div>
+                <div style="font-weight:800;color:#38bdf8;font-size:0.92rem;">SCOREBOARD FROZEN</div>
+                <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">Leaderboard locked for the final stretch. Your solves still count.</div>
+            </div>
+        </div>
+    </div>
+    <% } %>
 
-        <!-- Scoreboard -->
-        <div class="glass-panel fade-in" style="margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin: 0;">Progress</h2>
-                <div style="display: flex; align-items: center; gap: 24px;">
-                    <div class="timer-display">
-                        <%= timeDisplay %>
-                    </div>
-                    <div class="stat-value">
-                        <%= score %>
-                    </div>
+    <!-- ── Progress Panel ───────────────────────────────────── -->
+    <div class="glass-panel fade-in">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:18px;">
+            <div>
+                <h2 style="margin:0 0 4px;font-size:0.72rem;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);font-weight:600;">
+                    OPERATOR STATUS
+                </h2>
+                <div style="font-size:1.6rem;font-weight:800;color:var(--text-primary);">
+                    <%= user %>
+                    <% if (locals.team) { %>
+                    <span style="font-size:0.78rem;font-weight:600;color:var(--accent);font-family:var(--font-mono);margin-left:8px;">[ <%= team.name %> ]</span>
+                    <% } %>
                 </div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" <%- 'style="width: ' + progress + '%;\"' %>></div>
+                <div class="system-status" style="margin-top:6px;">SYSTEMS OPERATIONAL</div>
             </div>
 
-            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
-                <%= solved.length %> of <%= totalChallenges %> challenges completed
-            </p>
+            <div style="display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap;">
+                <!-- Timer -->
+                <div style="text-align:center;">
+                    <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:4px;font-family:var(--font-mono);">
+                        <% if (event.mode === 'running' && event.endMs) { %>TIME REMAINING<% } else if (event.mode === 'scheduled') { %>STARTS IN<% } else { %>ELAPSED<% } %>
+                    </div>
+                    <div class="timer-display" id="timerDisplay">
+                        <% if (event.mode === 'running' || event.mode === 'scheduled') { %>--:--:--<% } else { %><%= timeDisplay %><% } %>
+                    </div>
+                </div>
+
+                <!-- Score with breakdown -->
+                <div style="text-align:right;">
+                    <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:4px;font-family:var(--font-mono);">SCORE</div>
+                    <div class="stat-value"><%= score %></div>
+                    <div class="score-breakdown">
+                        <div class="sb-row">
+                            <span>Solves (<%= solved %>×100)</span>
+                            <span class="sb-positive">+<%= solved * 100 %></span>
+                        </div>
+                        <% const hintsTotal = Math.max(0, solved * 100 - score); %>
+                        <% if (hintsTotal > 0) { %>
+                        <div class="sb-row">
+                            <span>Hint penalty</span>
+                            <span class="sb-negative">-<%= hintsTotal %></span>
+                        </div>
+                        <% } %>
+                        <div class="sb-row sb-total">
+                            <span>Total</span>
+                            <span><%= score %> / <%= totalChallenges * 100 %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Flag Submission -->
-        <div class="glass-panel fade-in" style="margin-bottom: 24px; animation-delay: 0.1s;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Submit Flag</h2>
+        <!-- Progress bar -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);">
+                <%= solved %> / <%= totalChallenges %> CHALLENGES
+            </span>
+            <span style="font-size:0.72rem;color:var(--accent);font-family:var(--font-mono);">
+                <%= progress %>%
+            </span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: <%= progress %>%;"></div>
+        </div>
+    </div>
+
+    <!-- ── Flag Submission ───────────────────────────────────── -->
+    <div class="glass-panel fade-in" style="animation-delay:0.08s;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+            <h2 style="margin:0;">Submit Flag</h2>
+            <% if (event.submissionsOpen) { %>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="system-status" style="font-size:0.7rem;">SUBMISSIONS OPEN</span>
                 <span class="kbd">Ctrl+Enter</span>
             </div>
-            <form id="flagForm" style="display: flex; gap: 12px;">
-                <input type="text" id="flagInput" placeholder="CTF{...} or PI{...}" style="margin-bottom: 0; flex: 1;">
-                <button type="submit" class="btn">Submit</button>
-            </form>
-            <div id="flagMessage"
-                style="margin-top: 12px; padding: 12px; border-radius: 3px; display: none; font-size: 0.9rem;">
-            </div>
+            <% } %>
         </div>
 
-        <!-- Challenges -->
-        <div class="glass-panel fade-in" style="animation-delay: 0.2s;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin: 0;">Challenges</h2>
-                <span class="system-status">Online</span>
-            </div>
-
-            <div class="challenge-grid">
-                <% challenges.forEach(function(challenge) { %>
-                    <div class="challenge-card <%= challenge.status === 'Solved' ? 'solved' : '' %>">
-                        <div>
-                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                <div class="challenge-type">
-                                    <%= challenge.type %>
-                                </div>
-                                <span class="difficulty-badge difficulty-<%= challenge.difficulty.toLowerCase() %>">
-                                    <%= challenge.difficulty %>
-                                </span>
-                            </div>
-                            <h3>
-                                <%= challenge.name %>
-                            </h3>
-                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 8px 0;">
-                                <%= challenge.description %>
-                            </p>
-
-                            <% if (challenge.isGrouped && challenge.subFlags) { %>
-                                <div style="margin-top: 10px;">
-                                    <span
-                                        style="background: rgba(0, 242, 254, 0.08); color: var(--accent); border: 1px solid rgba(0, 242, 254, 0.2); padding: 3px 10px; border-radius: 12px; font-size: 0.75rem;">
-                                        <%= challenge.solvedCount %>/<%= challenge.totalCount %> Flags
-                                    </span>
-                                </div>
-                                <% } else if (challenge.status==='Solved' ) { %>
-                                    <span class="status-badge status-solved">Completed</span>
-                                    <% } %>
-                        </div>
-                        <div style="margin-top: 20px; display: flex; gap: 8px;">
-                            <a href="/challenge/<%= challenge.slug %>" class="btn" style="flex: 1; text-align: center;">
-                                <%= challenge.isGrouped ? 'Investigate' : 'Start' %>
-                            </a>
-                            <% if (challenge.status==='Solved' ) { %>
-                                <a href="/writeup/<%= challenge.id || challenge.subIds[0] %>" class="btn"
-                                    style="flex: 1; text-align: center; border-color: var(--text-muted); color: var(--text-muted);">Writeup</a>
-                                <% } %>
-                        </div>
-                    </div>
-                    <% }); %>
-            </div>
+        <% if (event.submissionsOpen) { %>
+        <form id="flagForm" style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input type="text" id="flagInput" placeholder="CTF{...} or PI{...}"
+                style="margin-bottom:0;flex:1;min-width:200px;"
+                autocomplete="off" autocorrect="off" spellcheck="false">
+            <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+                Submit Flag
+            </button>
+        </form>
+        <% } else if (event.isEnded) { %>
+        <div style="padding:16px;background:rgba(255,23,68,0.07);border:1px solid rgba(255,23,68,0.2);border-radius:8px;color:var(--danger);font-size:0.88rem;">
+            🏁 Submissions closed — the event has ended.
         </div>
+        <% } else { %>
+        <div style="padding:16px;background:rgba(255,152,0,0.06);border:1px solid rgba(255,152,0,0.2);border-radius:8px;color:var(--warning);font-size:0.88rem;">
+            ⏳ Submissions open when the event starts.
+        </div>
+        <% } %>
 
-        <footer>
-            <p>AQUILACYBER Platform &copy; <%= new Date().getFullYear() %>
-            </p>
-            <div style="display: flex; gap: 16px; margin-top: 10px;">
-                <a href="/leaderboard" style="color: var(--accent); text-decoration: none; font-size: 0.85rem;">View
-                    Leaderboard</a>
-                <span style="color: var(--border);">|</span>
-                <a href="/export-progress"
-                    style="color: var(--accent); text-decoration: none; font-size: 0.85rem;">Download Progress Report
-                    (JSON)</a>
-            </div>
-        </footer>
+        <div id="flagMessage" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:0.88rem;"></div>
     </div>
 
-    <!-- Completion Modal -->
-    <div id="completionModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto;">
-        
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 16px; width: 100%; box-sizing: border-box;">
-            
-            <!-- Certificate Card -->
-            <div id="certificateCard"
-                style="background: #0d1117; border: 2px solid var(--accent-primary); border-radius: 8px; padding: 32px 28px; text-align: center; width: 100%; max-width: 750px; position: relative; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 0 40px rgba(0, 255, 136, 0.12); overflow: hidden; font-family: 'Inter', system-ui, sans-serif; box-sizing: border-box;">
-                
-                <!-- Decorative corners -->
-                <div style="position: absolute; top: -40px; left: -40px; width: 100px; height: 100px; border: 2px solid var(--accent-primary); transform: rotate(45deg); opacity: 0.08;"></div>
-                <div style="position: absolute; bottom: -40px; right: -40px; width: 100px; height: 100px; border: 2px solid var(--accent-primary); transform: rotate(45deg); opacity: 0.08;"></div>
-                <div style="position: absolute; top: 10px; right: 12px; font-family: monospace; color: var(--text-muted); opacity: 0.4; font-size: 0.6rem;">ID: <%= Math.random().toString(36).substr(2, 9).toUpperCase() %></div>
+    <!-- ── Challenges Grid ───────────────────────────────────── -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <h2 style="margin:0;">Challenges</h2>
+        <a href="/leaderboard" style="color:var(--accent);font-size:0.82rem;font-weight:600;display:flex;align-items:center;gap:4px;">
+            View Leaderboard →
+        </a>
+    </div>
 
-                <div style="font-size: 2rem; margin-bottom: 6px;">🏆</div>
-                <h1 style="font-size: 1.4rem; margin-bottom: 4px; font-weight: 800; letter-spacing: 2px; color: #fff; text-transform: uppercase;">Certificate of Excellence</h1>
-                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">This certifies that</p>
-                
-                <h2 style="font-size: 2rem; color: var(--accent-primary); margin-bottom: 12px; font-family: monospace; border-bottom: 1px solid rgba(0, 255, 136, 0.3); display: inline-block; padding-bottom: 6px; padding-left: 16px; padding-right: 16px;"><%= user %></h2>
-                
-                <p style="font-size: 0.8rem; margin-bottom: 0; line-height: 1.5; max-width: 580px; margin-left: auto; margin-right: auto; color: var(--text-muted);">
-                    Has successfully compromised all target systems and demonstrated elite proficiency in web application security testing, vulnerability assessment, and OSINT analysis across the <strong style="color: #fff;">AQUILA CYBER CTF</strong>.
+    <% if (challenges && challenges.length > 0) { %>
+    <div class="challenge-grid">
+        <% challenges.forEach(function(ch) { %>
+        <%
+        const _solved = ch.status === 'Solved';
+        const _partial = ch.status === 'Partial';
+        const _chUrl = '/challenge/' + ch.slug;
+        const _solveLabel = _solved ? 'Revisit' : 'Start →';
+        %>
+        <div class="challenge-card <%= _solved ? 'solved' : '' %> fade-in">
+            <div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                    <span class="challenge-type"><%= ch.type %></span>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <span class="difficulty-badge difficulty-<%= ch.difficulty.toLowerCase() %>"><%= ch.difficulty %></span>
+                        <% if (_solved) { %><span style="color:var(--success);font-size:0.9rem;">✓</span><% } %>
+                        <% if (_partial) { %><span style="color:var(--warning);font-size:0.72rem;font-family:var(--font-mono);"><%= ch.solvedCount %>/<%= ch.totalCount %></span><% } %>
+                    </div>
+                </div>
+                <h3 style="margin:0 0 8px;"><%= ch.name %></h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin:0;line-height:1.5;">
+                    <%= ch.description || 'Exploit the vulnerability to retrieve the hidden flag.' %>
                 </p>
-                
-                <div style="display: flex; justify-content: space-around; width: 100%; margin-top: 18px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 14px;">
-                    <div style="text-align: left;">
-                        <p style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Final Score</p>
-                        <p style="font-size: 1.15rem; font-weight: 700; color: var(--warning); margin: 0;"><%= score %> pts</p>
+                <% if (ch.isGrouped && ch.subFlags) { %>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+                    <% ch.subFlags.forEach(function(sf) { %>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;font-family:var(--font-mono);color:var(--text-muted);">
+                        <span style="color:<%= sf.solved ? 'var(--success)' : 'var(--text-muted)' %>;">
+                            <%= sf.solved ? '✓' : '○' %>
+                        </span>
+                        <span style="color:<%= sf.solved ? 'var(--success)' : 'var(--text-muted)' %>;">
+                            <%= sf.label %>
+                        </span>
                     </div>
-                    <div style="text-align: right;">
-                        <p style="font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Date</p>
-                        <p style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;"><%= new Date().toLocaleDateString('en-GB') %></p>
-                    </div>
+                    <% }); %>
+                </div>
+                <% } %>
+            </div>
+            <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent);font-weight:600;">100 pts<% if (ch.isGrouped) { %> × <%= ch.totalCount %><% } %></span>
+                <div style="display:flex;gap:6px;">
+                    <% if (_solved) { %>
+                    <a href="/writeup/<%= ch.id %>" class="btn" style="font-size:0.72rem;padding:6px 12px;border-color:var(--success);color:var(--success);">Writeup</a>
+                    <% } %>
+                    <a href="<%= _chUrl %>" class="btn btn-primary" style="font-size:0.72rem;padding:6px 14px;">
+                        <%= _solveLabel %>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+    <% } else { %>
+    <div class="glass-panel">
+        <div class="empty-state">
+            <div class="es-icon">🔒</div>
+            <div class="es-title">No challenges loaded</div>
+            <div class="es-text">Challenges will appear here once the platform is configured.</div>
+        </div>
+    </div>
+    <% } %>
+
+</div><!-- /container -->
+
+<!-- ── Completion Modal ────────────────────────────────────── -->
+<div id="completionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:1000;justify-content:center;align-items:center;overflow-y:auto;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:32px 16px;width:100%;box-sizing:border-box;">
+
+        <!-- Certificate -->
+        <div id="certificateCard" style="
+            background: linear-gradient(145deg, #0D1022, #1C2147);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 40px 36px;
+            text-align: center;
+            width: 100%;
+            max-width: 680px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(255,107,44,0.2), 0 24px 48px rgba(0,0,0,0.6);
+            box-sizing: border-box;
+        ">
+            <!-- Decorative elements -->
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent);"></div>
+            <div style="position:absolute;top:-50px;right:-50px;width:120px;height:120px;border:2px solid rgba(255,107,44,0.12);border-radius:50%;"></div>
+            <div style="position:absolute;bottom:-50px;left:-50px;width:120px;height:120px;border:2px solid rgba(255,107,44,0.08);border-radius:50%;"></div>
+            <div style="position:absolute;top:12px;right:16px;font-family:var(--font-mono);color:var(--text-muted);font-size:0.58rem;opacity:0.5;">
+                ID: <%= Math.random().toString(36).substr(2,9).toUpperCase() %>
+            </div>
+
+            <!-- Brand -->
+            <div style="margin-bottom:20px;">
+                <div style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">AquilaCyber</div>
+                <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:900;text-transform:uppercase;letter-spacing:3px;color:var(--brand-white);">
+                    DEFENDERS<span style="color:var(--accent);">®</span>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%; max-width: 750px; justify-content: center;">
-                <button onclick="document.getElementById('completionModal').style.display='none'" class="btn" style="background: transparent; border-color: var(--border); color: var(--text-muted); padding: 7px 14px; font-size: 0.72rem;">&times; Close</button>
-                <button id="shareBtn" class="btn" style="padding: 7px 18px; font-weight: 600; font-size: 0.72rem; display: inline-flex; justify-content: center; align-items: center; gap: 5px;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Download Certificate
-                </button>
-                <a href="https://aquilacyber.com" target="_blank" class="btn" style="text-align: center; background: transparent; border-color: var(--accent-primary); color: var(--accent-primary); padding: 7px 14px; font-size: 0.72rem; text-decoration: none;">AquilaCyber</a>
-                <a href="https://chat.whatsapp.com/your-invite-link" target="_blank" class="btn" style="text-align: center; background: #25D366; border-color: #25D366; color: #fff; font-weight: 600; padding: 7px 14px; font-size: 0.72rem; text-decoration: none;">WhatsApp Community</a>
+            <div style="font-size:2.4rem;margin-bottom:8px;">🏆</div>
+            <div style="font-family:var(--font-mono);font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Certificate of Excellence</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:14px;">This certifies that</div>
+
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--accent);margin-bottom:6px;letter-spacing:1px;"><%= user %></div>
+            <div style="width:60px;height:2px;background:var(--accent);margin:0 auto 16px;border-radius:1px;"></div>
+
+            <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.6;max-width:480px;margin:0 auto 20px;">
+                Has successfully compromised all target systems and demonstrated elite proficiency in web application security testing, vulnerability assessment, and OSINT intelligence gathering on the
+                <strong style="color:var(--brand-white);">AQUILA CTF</strong> platform.
+            </p>
+
+            <div style="display:flex;justify-content:space-around;width:100%;border-top:1px solid rgba(255,107,44,0.15);padding-top:16px;">
+                <div style="text-align:left;">
+                    <div style="font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Final Score</div>
+                    <div style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--accent);"><%= score %> pts</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Challenges</div>
+                    <div style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--success);"><%= solved %>/<%= totalChallenges %></div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Date</div>
+                    <div style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--text-primary);"><%= new Date().toLocaleDateString('en-GB') %></div>
+                </div>
             </div>
         </div>
+
+        <!-- Actions -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;max-width:680px;width:100%;justify-content:center;">
+            <button onclick="document.getElementById('completionModal').style.display='none'" class="btn" style="font-size:0.75rem;">
+                ✕ Close
+            </button>
+            <button id="shareBtn" class="btn btn-primary" style="font-size:0.75rem;">
+                ⬇ Download Certificate
+            </button>
+            <a id="shareX" href="#" target="_blank" class="btn" style="font-size:0.75rem;background:rgba(0,0,0,0.4);border-color:#555;color:#fff;">
+                𝕏 Share
+            </a>
+            <a href="https://aquilacyber.com" target="_blank" class="btn" style="font-size:0.75rem;border-color:var(--accent);color:var(--accent);">
+                AquilaCyber
+            </a>
+        </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script>
-        const flagForm = document.getElementById('flagForm');
-        const flagInput = document.getElementById('flagInput');
-        const flagMessage = document.getElementById('flagMessage');
-        const completionModal = document.getElementById('completionModal');
-        const shareBtn = document.getElementById('shareBtn');
-        const themeToggle = document.getElementById('themeToggle');
-        const moonIcon = document.getElementById('moonIcon');
-        const sunIcon = document.getElementById('sunIcon');
+<!-- ── First-blood toast ── -->
+<div class="first-blood-toast" id="fbToast">
+    <div class="fbt-label">🩸 First Blood</div>
+    <div class="fbt-icon">💀</div>
+    <div class="fbt-chall" id="fbChall"></div>
+    <div class="fbt-who" id="fbWho"></div>
+</div>
 
-        // Sounds
-        const sounds = {
-            success: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA=='), // Placeholder
-            error: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA==') // Placeholder
-        };
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+    // ── Elements ──────────────────────────────────────────────
+    const flagForm       = document.getElementById('flagForm');
+    const flagInput      = document.getElementById('flagInput');
+    const flagMessage    = document.getElementById('flagMessage');
+    const completionModal= document.getElementById('completionModal');
+    const shareBtn       = document.getElementById('shareBtn');
+    const shareXBtn      = document.getElementById('shareX');
 
-        // Simple beep generation for now
-        const playSound = (type) => {
+    // ── Sound ─────────────────────────────────────────────────
+    const playSound = (type) => {
+        try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
             gain.connect(ctx.destination);
-
             if (type === 'success') {
-                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
             } else {
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.type = 'sawtooth';
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.2);
+                osc.frequency.setValueAtTime(300, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.12);
             }
-        };
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.3);
+        } catch (_) {}
+    };
 
-        // Theme Management
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme);
+    // ── Toast ─────────────────────────────────────────────────
+    function showToast(message, type) {
+        const t = document.createElement('div');
+        t.className = 'toast ' + (type || '');
+        t.innerHTML = `<span>${type === 'success' ? '✓' : '✗'}</span> ${message}`;
+        document.body.appendChild(t);
+        setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transform = 'translateX(110%)';
+            t.style.transition = 'all 0.4s ease';
+            setTimeout(() => t.remove(), 400);
+        }, 3800);
+    }
 
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        });
+    // ── Timer ─────────────────────────────────────────────────
+    const timerEl       = document.getElementById('timerDisplay');
+    const bannerCountdown = document.getElementById('countdownBanner');
+    const eventMode     = '<%= event.mode %>';
+    const eventEndMs    = <%= event.endMs   || 'null' %>;
+    const eventStartMs  = <%= event.startMs || 'null' %>;
+    const serverStartTime = <%= startTime %>;
 
-        function updateThemeIcon(theme) {
-            if (theme === 'dark') {
-                moonIcon.style.display = 'block';
-                sunIcon.style.display = 'none';
-            } else {
-                moonIcon.style.display = 'none';
-                sunIcon.style.display = 'block';
+    function pad(n) { return String(n).padStart(2,'0'); }
+    function fmtCountdown(ms) {
+        if (ms <= 0) return '00:00:00';
+        const s = Math.floor(ms / 1000);
+        return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;
+    }
+
+    setInterval(() => {
+        const now = Date.now();
+        if (eventMode === 'running' && eventEndMs) {
+            const rem = eventEndMs - now;
+            if (timerEl) {
+                timerEl.textContent = rem > 0 ? fmtCountdown(rem) : '00:00:00';
+                if (rem < 300000) timerEl.classList.add('countdown-ending');
             }
+        } else if (eventMode === 'scheduled' && eventStartMs) {
+            const rem = eventStartMs - now;
+            const d = rem > 0 ? fmtCountdown(rem) : '00:00:00';
+            if (timerEl) timerEl.textContent = d;
+            if (bannerCountdown) bannerCountdown.textContent = d;
+            if (rem <= 0) setTimeout(() => location.reload(), 1500);
+        } else {
+            const el = Math.floor((now - serverStartTime) / 1000);
+            if (timerEl) timerEl.textContent = `${pad(Math.floor(el/3600))}:${pad(Math.floor((el%3600)/60))}:${pad(el%60)}`;
         }
+    }, 1000);
 
-        const totalChallenges = <%= totalChallenges %>;
-        const solvedCount = <%= solved.length %>;
-        if (solvedCount === totalChallenges) {
-            setTimeout(() => {
-                showCompletion();
-                playSound('success');
-            }, 800);
-        }
+    // ── Flag submission ───────────────────────────────────────
+    if (flagForm) flagForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const flag = flagInput.value.trim();
+        if (!flag) return;
 
-        // Real-time timer update
-        const serverStartTime = <%= startTime %>;
-        const timerDisplayElement = document.querySelector('.timer-display');
+        const submitBtn = flagForm.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
 
-        setInterval(() => {
-            const elapsedSeconds = Math.floor((Date.now() - serverStartTime) / 1000);
-            const hours = Math.floor(elapsedSeconds / 3600);
-            const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-            const seconds = elapsedSeconds % 60;
-            timerDisplayElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }, 1000);
-
-        flagForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const flag = flagInput.value.trim();
-
-            if (!flag) return;
-
-            const response = await fetch('/submit', {
+        try {
+            const res  = await fetch('/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `flag=${encodeURIComponent(flag)}`
+                body: 'flag=' + encodeURIComponent(flag)
             });
-
-            const data = await response.json();
+            const data = await res.json();
 
             if (data.success) {
-                // Show toast notification
-                showToast(data.challengeName + ' completed! +100 pts', 'success');
+                const pts = data.firstBlood ? '+100 pts 🩸 FIRST BLOOD!' : '+100 pts';
+                let msg = `${data.challengeName} completed! ${pts}`;
+                if (data.newTeamScore !== null && data.newTeamScore !== undefined) {
+                    msg += ` · Team: ${data.newTeamScore}pts`;
+                }
+                showToast(msg, 'success');
                 playSound('success');
                 flagInput.value = '';
+                flagMessage.style.display = 'none';
+
+                // Update nav score live
+                const navScore = document.getElementById('navScore');
+                if (navScore && data.newScore) navScore.textContent = data.newScore + ' pts';
 
                 setTimeout(() => {
-                    location.reload();
-                }, 1500);
+                    if (data.newScore >= <%= totalChallenges * 100 %>) showCompletion();
+                    else location.reload();
+                }, 1200);
             } else {
                 playSound('error');
                 flagMessage.style.display = 'block';
-                flagMessage.style.background = 'rgba(255, 68, 68, 0.1)';
-                flagMessage.style.border = '1px solid var(--danger)';
-                flagMessage.style.color = 'var(--danger)';
-                flagMessage.textContent = `✗ ${data.message}`;
+                flagMessage.style.cssText += ';background:rgba(255,23,68,0.08);border:1px solid rgba(255,23,68,0.25);color:var(--danger);border-radius:8px;padding:12px;';
+                flagMessage.textContent = '✗ ' + data.message;
             }
-        });
-
-        function showToast(message, type) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+        } catch (err) {
+            showToast('Connection error. Try again.', 'error');
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Flag'; }
         }
+    });
+    if (flagForm) { } // end if(flagForm)
 
-        function showCompletion() {
-            const duration = 3 * 1000;
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 25, spread: 360, ticks: 50, zIndex: 2000, colors: ['#00ff88', '#00cc6a', '#ffffff'] };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
+    // ── Ctrl+Enter shortcut ───────────────────────────────────
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            if (flagForm && document.activeElement === flagInput) {
+                flagForm.dispatchEvent(new Event('submit'));
+            } else if (flagInput) {
+                flagInput.focus();
             }
-
-            const interval = setInterval(function () {
-                const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
-                const particleCount = 30 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.2, 0.4), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.6, 0.8), y: Math.random() - 0.2 } }));
-            }, 250);
-
-            completionModal.style.display = 'flex';
         }
+    });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
-                if (document.activeElement === flagInput) {
-                    flagForm.dispatchEvent(new Event('submit'));
-                } else {
-                    flagInput.focus();
-                }
-            }
-            if (e.ctrlKey && e.key === 'j') {
-                e.preventDefault();
-                themeToggle.click();
-            }
-            if (e.key === 'Escape') {
-                completionModal.style.display = 'none';
-            }
-        });
-
-        // Certificate Download Logic
-        if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
-                const card = document.getElementById('certificateCard');
-                
-                // Add a small loading state to button
-                const originalText = shareBtn.innerHTML;
-                shareBtn.innerHTML = 'Generating...';
-                shareBtn.disabled = true;
-
-                html2canvas(card, {
-                    backgroundColor: '#0d1117',
-                    scale: 3, // High resolution for printing
-                    logging: false,
-                    useCORS: true
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `Aquila_Certificate_<%= user %>.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    // Restore button
-                    shareBtn.innerHTML = originalText;
-                    shareBtn.disabled = false;
-                }).catch(err => {
-                    console.error('Error generating certificate:', err);
-                    shareBtn.innerHTML = originalText;
-                    shareBtn.disabled = false;
-                    showToast('Failed to generate certificate', 'error');
+    // ── First-blood polling ───────────────────────────────────
+    async function pollFirstBlood() {
+        try {
+            const res  = await fetch('/notifications');
+            const data = await res.json();
+            if (data.notifications && data.notifications.length > 0) {
+                data.notifications.forEach(n => {
+                    const who = n.teamName ? `${n.username} [${n.teamName}]` : n.username;
+                    showFirstBloodToast(n.challengeName, who);
                 });
-            });
-        }
-    </script>
-</body>
+            }
+        } catch (_) {}
+    }
 
+    function showFirstBloodToast(challengeName, who) {
+        const el = document.getElementById('fbToast');
+        document.getElementById('fbChall').textContent = challengeName;
+        document.getElementById('fbWho').textContent   = who;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    setTimeout(() => { pollFirstBlood(); setInterval(pollFirstBlood, 30000); }, 5000);
+
+    // ── Completion modal ──────────────────────────────────────
+    function showCompletion() {
+        completionModal.style.display = 'flex';
+
+        // X share URL
+        const shareText = encodeURIComponent(`I just completed the AQUILA CTF by @aquila_cyber! 🩸 All <%= totalChallenges %> challenges down. #AquilaCTF #CyberSecurity`);
+        if (shareXBtn) shareXBtn.href = `https://twitter.com/intent/tweet?text=${shareText}&url=https://aquilacyber.com`;
+
+        // Confetti in brand colors
+        const defaults = { colors: ['#FF6B2C','#E8500A','#FFFFFF','#1C2147'], zIndex: 1001 };
+        function fire(count, opts) { confetti(Object.assign({}, defaults, opts, { particleCount: count })); }
+        fire(40, { spread: 50, origin: { x: 0.2, y: 0.6 } });
+        fire(40, { spread: 50, origin: { x: 0.8, y: 0.6 } });
+        setTimeout(() => fire(60, { spread: 90, startVelocity: 25, origin: { x: 0.5, y: 0.5 } }), 300);
+    }
+
+    // ── Download certificate ──────────────────────────────────
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            shareBtn.disabled = true;
+            shareBtn.textContent = 'Generating...';
+            try {
+                const card = document.getElementById('certificateCard');
+                const canvas = await html2canvas(card, { backgroundColor: '#0D1022', scale: 2, useCORS: true });
+                const link = document.createElement('a');
+                link.download = 'aquila-ctf-certificate-<%= user %>.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                showToast('Could not generate certificate', 'error');
+            } finally {
+                shareBtn.disabled = false;
+                shareBtn.textContent = '⬇ Download Certificate';
+            }
+        });
+    }
+
+    // ── Auto-close completion modal ───────────────────────────
+    if (completionModal) {
+        completionModal.addEventListener('click', (e) => {
+            if (e.target === completionModal) completionModal.style.display = 'none';
+        });
+    }
+</script>
+</body>
 </html>

@@ -1,0 +1,43 @@
+# ============================================================
+# AquilaCyber CTF Platform — Development Dockerfile
+# Single-stage, full Node 18, hot-reload via --watch
+#
+# Do NOT use this in production.
+# Use: docker compose -f docker-compose.dev.yml up --build
+# ============================================================
+
+FROM node:18
+
+WORKDIR /app
+
+# Install system deps (ping for Challenge 4)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install deps first — this layer is cached unless package.json changes
+COPY package.json ./
+
+# --loglevel=error hides noisy npm deprecation warnings from standard error output
+RUN npm install --loglevel=error
+
+# Pre-generate the Phantom Insider evidence files (needed at runtime).
+# Source is mounted as a volume so generate.js is available after mount.
+# We generate here so the container starts clean, but if you change
+# phantom-insider/generate.js you'll need to rebuild.
+COPY phantom-insider/ ./phantom-insider/
+RUN node phantom-insider/generate.js
+
+# Create flag files (challenge filesystem reads)
+RUN mkdir -p /app/ping_sandbox && echo "CTF{cmd_inj_root_access_pwned}" > /app/ping_sandbox/flag_ping.txt
+RUN echo "CTF{rce_eval_is_evil_math}"      > /app/flag_calc.txt
+RUN echo "CTF{xxe_entity_expansion_pro}"   > /app/flag_xxe.txt
+
+# Create runtime dirs
+RUN mkdir -p /app/uploads /app/data-persist
+
+EXPOSE 3000
+
+# node --watch is Node 18's built-in file watcher (no nodemon needed).
+# The source volume mount means edits on your host are reflected instantly.
+CMD ["npm", "run", "dev"]

@@ -98,7 +98,7 @@ module.exports = {
         steps: [
             "Flag 1: Review the Chatter archive and Blog snapshot. Note the insider's pet name and department. Cross-reference this with the NexaCorp Employee Directory CSV to identify the employee ID (E-8931) and access their profile page.",
             "Flag 2: Download 'meetup_spot.jpg' from the blog. Use an EXIF viewer or 'exiftool' to inspect the image metadata. The flag is hidden inside the 'ImageDescription' field.",
-            "Flag 3: Search 'breach_dump_2024.txt' for the suspect's username to find an MD5 hash. Crack it using John the Ripper and the rockyou wordlist (password is 'liverpool123'). Use this password to extract the 'stolen_data.zip' archive and read the final flag."
+            "Flag 3: Search 'breach_dump_2024.txt' for the suspect's username to find an MD5 hash. Crack it using John the Ripper and the rockyou wordlist. Use the cracked password to extract the 'stolen_data.zip' archive and read the final flag."
         ],
         remediation: "Enforce strict metadata stripping on uploaded images, mandate strong password policies to prevent dictionary attacks, and implement robust access controls to prevent unauthorized data exfiltration."
     }

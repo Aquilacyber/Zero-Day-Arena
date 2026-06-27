@@ -1,112 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>/* inline theme - no FOUC */
+    (function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+    </script>
+    <!-- inline theme -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <link rel="stylesheet" href="/style.css">
-    <style>
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .leaderboard-table th, .leaderboard-table td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        .leaderboard-table th {
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-        .leaderboard-table tr:hover {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-        .rank-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-weight: bold;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        .rank-1 { background: #ffd700; color: #000; }
-        .rank-2 { background: #c0c0c0; color: #000; }
-        .rank-3 { background: #cd7f32; color: #000; }
-        .current-user {
-            background-color: rgba(56, 189, 248, 0.1) !important;
-        }
-    </style>
-    <script src="/theme.js"></script>
 </head>
-<body>
-    <div class="container">
-        <header style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="margin: 0; display: flex; align-items: center; gap: 12px;">
-                    🏆 Global Leaderboard
-                </h1>
-                <p style="color: var(--text-secondary); margin-top: 8px;">Top security researchers by score</p>
-            </div>
-            <a href="/" class="btn">← Back to Dashboard</a>
-        </header>
+<body class="has-nav">
 
-        <div class="glass-panel">
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th width="80">Rank</th>
-                        <th>Hacker</th>
-                        <th>Score</th>
-                        <th>Solved</th>
-                        <th>Hints Used</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% leaderboard.forEach((user, index) => { %>
-                        <tr class="<%= user.username === currentUser ? 'current-user' : '' %>">
-                            <td>
-                                <span class="rank-badge <%= [0, 1, 2].includes(index) ? 'rank-' + (index + 1) : '' %>">
-                                    <%= index + 1 %>
-                                </span>
-                            </td>
-                            <td <%- 'style="font-weight: 600; color: ' + (user.username === currentUser ? 'var(--accent)' : 'inherit') + ';"' %>>
-                                <%= user.username %>
-                                <% if (user.username === currentUser) { %>
-                                    <span style="font-size: 0.75rem; color: var(--accent); margin-left: 8px;">(You)</span>
-                                <% } %>
-                            </td>
-                            <td style="color: var(--accent); font-weight: bold; font-family: var(--font-mono); font-size: 1.1rem;">
-                                <%= user.score %>
-                            </td>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden; max-width: 100px;">
-                                        <div <%- 'style="height: 100%; width: ' + ((user.solved / totalChallenges) * 100) + '%; background: var(--success);"' %>></div>
-                                    </div>
-                                    <span style="font-size: 0.9rem; color: var(--text-secondary);"><%= user.solved %>/<%= totalChallenges %></span>
-                                </div>
-                            </td>
-                            <td style="color: var(--warning); font-family: var(--font-mono);">
-                                <%= user.hintsUsed %>
-                            </td>
-                        </tr>
-                    <% }); %>
-                    <% if (leaderboard.length === 0) { %>
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">No hackers registered yet.</td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
+<%- include('partials/nav', {
+    user: currentUser,
+    score: 0,
+    currentPage: 'leaderboard',
+    isAdmin: false
+}) %>
+
+<div class="container">
+
+    <header style="margin-bottom:28px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
+        <div>
+            <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">
+                <%= event.name %>
+            </div>
+            <h1 style="margin:0;font-size:2rem;">
+                🏆 Leaderboard
+            </h1>
+            <p style="color:var(--text-secondary);margin:6px 0 0;font-size:0.85rem;">
+                <% if (event.isEnded) { %>
+                    🏁 <strong style="color:var(--danger);">Final standings</strong> — event ended
+                <% } else if (event.isFrozen) { %>
+                    ❄️ <strong style="color:#38bdf8;">Scoreboard frozen</strong> — final stretch
+                <% } else { %>
+                    <span class="system-status">LIVE</span>
+                    &nbsp; Auto-refreshes every 30s
+                <% } %>
+            </p>
         </div>
-    </div>
+        <% if (hasTeams) { %>
+        <div class="view-toggle">
+            <button class="view-btn <%= viewMode === 'individual' ? 'active' : '' %>"
+                onclick="window.location='/leaderboard?view=individual'">Individual</button>
+            <button class="view-btn <%= viewMode === 'teams' ? 'active' : '' %>"
+                onclick="window.location='/leaderboard?view=teams'">Teams</button>
+        </div>
+        <% } %>
+    </header>
+
+    <div class="glass-panel fade-in" style="padding:0;overflow:hidden;">
+
+        <% if (viewMode === 'individual') { %>
+        <table class="lb-table" id="lbTable">
+            <thead>
+                <tr>
+                    <th style="width:50px;">Rank</th>
+                    <th>Operator</th>
+                    <th>Score</th>
+                    <th>Solved</th>
+                    <th>Hints</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% if (individualBoard && individualBoard.length > 0) { %>
+                <% individualBoard.forEach(function(u, i) { %>
+                <tr class="<%= u.username === currentUser ? 'current-row' : '' %>"
+                    data-username="<%= u.username %>" data-score="<%= u.score %>">
+                    <td>
+                        <span class="rank-badge <%= i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '' %>">
+                            <%= i + 1 %>
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <div>
+                                <span style="font-weight:700;color:<%= u.username === currentUser ? 'var(--accent)' : 'var(--text-primary)' %>;">
+                                    <%= u.username %>
+                                </span>
+                                <% if (u.username === currentUser) { %>
+                                <span style="font-size:0.65rem;color:var(--accent);margin-left:4px;">(You)</span>
+                                <% } %>
+                                <% if (u.teamName) { %>
+                                <span class="team-badge"><%= u.teamName %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-family:var(--font-mono);font-size:1.05rem;font-weight:700;color:var(--accent);">
+                            <%= u.score %>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="solve-bar">
+                            <div class="solve-track">
+                                <div class="solve-fill" style="width:<%= Math.round((u.solved/totalChallenges)*100) %>%;"></div>
+                            </div>
+                            <span style="font-size:0.8rem;color:var(--text-secondary);font-family:var(--font-mono);">
+                                <%= u.solved %>/<%= totalChallenges %>
+                            </span>
+                        </div>
+                    </td>
+                    <td style="color:var(--warning);font-family:var(--font-mono);font-size:0.88rem;"><%= u.hintsUsed %></td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <div class="es-icon">🔒</div>
+                            <div class="es-title">No operators yet</div>
+                            <div class="es-text">Be the first to register and solve a challenge.</div>
+                        </div>
+                    </td>
+                </tr>
+            <% } %>
+            </tbody>
+        </table>
+
+        <% } else { %>
+
+        <table class="lb-table">
+            <thead>
+                <tr>
+                    <th style="width:50px;">Rank</th>
+                    <th>Team</th>
+                    <th>Score</th>
+                    <th>Solved</th>
+                    <th>Members</th>
+                    <th>Hints</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% if (teamBoard && teamBoard.length > 0) { %>
+                <% teamBoard.forEach(function(t, i) { %>
+                <tr>
+                    <td>
+                        <span class="rank-badge <%= i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '' %>">
+                            <%= i + 1 %>
+                        </span>
+                    </td>
+                    <td>
+                        <div>
+                            <span style="font-weight:800;color:var(--text-primary);"><%= t.teamName %></span>
+                            <span class="code-pill" style="margin-left:8px;"><%= t.teamCode %></span>
+                        </div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">
+                            Captain: <span style="color:var(--text-secondary);"><%= t.captain %></span>
+                        </div>
+                    </td>
+                    <td style="font-family:var(--font-mono);font-size:1.05rem;font-weight:700;color:var(--accent);"><%= t.score %></td>
+                    <td>
+                        <div class="solve-bar">
+                            <div class="solve-track">
+                                <div class="solve-fill" style="width:<%= Math.round((t.solved/totalChallenges)*100) %>%;"></div>
+                            </div>
+                            <span style="font-size:0.8rem;color:var(--text-secondary);font-family:var(--font-mono);"><%= t.solved %>/<%= totalChallenges %></span>
+                        </div>
+                    </td>
+                    <td style="font-family:var(--font-mono);color:var(--text-secondary);"><%= t.memberCount %></td>
+                    <td style="color:var(--warning);font-family:var(--font-mono);"><%= t.hintsUsed %></td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="es-icon">👥</div>
+                            <div class="es-title">No teams yet</div>
+                            <div class="es-text">Teams are created during registration.</div>
+                        </div>
+                    </td>
+                </tr>
+            <% } %>
+            </tbody>
+        </table>
+        <% } %>
+
+    </div><!-- /glass-panel -->
+
+</div><!-- /container -->
+
+<script>
+// ── Live rank update polling (Priority 3) ───────────────────
+<% if (!event.isFrozen && !event.isEnded && viewMode === 'individual') { %>
+let _prevRanks = {};
+
+// Build initial rank snapshot from server-rendered table
+document.querySelectorAll('#lbTable tbody tr[data-username]').forEach((row, i) => {
+    _prevRanks[row.dataset.username] = i + 1;
+});
+
+async function refreshLeaderboard() {
+    try {
+        const res  = await fetch('/leaderboard?view=individual', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        // We get back a full page — this is a lightweight poll via page parse
+        // Use a different approach: fetch /api/leaderboard-data if we add it,
+        // or just reload the tbody via fetch + DOMParser
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc    = parser.parseFromString(html, 'text/html');
+        const newTbody = doc.querySelector('#lbTable tbody');
+        const oldTbody = document.querySelector('#lbTable tbody');
+        if (!newTbody || !oldTbody) return;
+
+        // Build new rank map
+        const newRanks = {};
+        newTbody.querySelectorAll('tr[data-username]').forEach((row, i) => {
+            newRanks[row.dataset.username] = i + 1;
+        });
+
+        // Inject rank-change badges before swapping DOM
+        newTbody.querySelectorAll('tr[data-username]').forEach((row) => {
+            const name  = row.dataset.username;
+            const prev  = _prevRanks[name];
+            const curr  = newRanks[name];
+            if (prev === undefined) {
+                // New entry — flash
+                row.classList.add('new-entry');
+            } else if (prev !== curr) {
+                const delta = prev - curr; // positive = moved up
+                const badge = document.createElement('span');
+                badge.className = 'rank-change ' + (delta > 0 ? 'up' : 'down');
+                badge.textContent = delta > 0 ? `↑${delta}` : `↓${Math.abs(delta)}`;
+                const rankCell = row.querySelector('td:first-child');
+                if (rankCell) rankCell.appendChild(badge);
+            }
+        });
+
+        oldTbody.innerHTML = newTbody.innerHTML;
+        _prevRanks = newRanks;
+
+    } catch (_) { /* silent */ }
+}
+
+// Poll every 30s
+setInterval(refreshLeaderboard, 30000);
+<% } %>
+</script>
+
 </body>
 </html>

@@ -9,7 +9,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-7',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 7,
+    challengeName: 'Settings Panel',
+    challengeType: 'CSRF',
+    challengeDifficulty: 'Medium',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <h1>Settings Panel</h1>
         <p style="color: var(--text-secondary);">CSRF Challenge - Update your account settings</p>

@@ -1,0 +1,43 @@
+<%
+// challenge_header.ejs — Consistent identity header for every challenge page
+// Pass: challengeId, challengeName, challengeType, challengeDifficulty, challengePoints (default 100)
+const _chId     = locals.challengeId     || 0;
+const _chName   = locals.challengeName   || 'Challenge';
+const _chType   = locals.challengeType   || 'Web';
+const _chDiff   = locals.challengeDifficulty || 'Medium';
+const _chPts    = locals.challengePoints || 100;
+const _chSolved = locals.challengeSolved || false;
+%>
+<div class="challenge-page-header fade-in">
+    <div class="cph-left">
+        <div class="cph-breadcrumb">
+            <a href="/">Dashboard</a>
+            &nbsp;›&nbsp; Challenges &nbsp;›&nbsp;
+            <span style="color:var(--text-secondary);">Challenge <%= _chId %></span>
+        </div>
+        <h1 class="cph-title"><%= _chName %></h1>
+        <div class="cph-meta">
+            <span style="
+                font-family:var(--font-mono);
+                font-size:0.68rem;
+                text-transform:uppercase;
+                letter-spacing:2px;
+                color:var(--accent);
+                font-weight:600;">
+                <%= _chType %>
+            </span>
+            <span style="color:var(--border);font-size:0.7rem;">·</span>
+            <span class="difficulty-badge difficulty-<%= _chDiff.toLowerCase() %>"><%= _chDiff %></span>
+            <% if (_chSolved) { %>
+            <span class="status-badge status-solved" style="font-size:0.62rem;">✓ Solved</span>
+            <% } %>
+        </div>
+    </div>
+    <div class="cph-right">
+        <div style="text-align:right;">
+            <div class="cph-points"><%= _chPts %></div>
+            <div class="cph-points-label">points</div>
+        </div>
+        <a href="/" class="btn btn-navy" style="font-size:0.75rem; padding:8px 14px;">← Back</a>
+    </div>
+</div>

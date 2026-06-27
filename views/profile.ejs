@@ -2,6 +2,9 @@
 <html lang="en">
 
 <head>
+    <script>/* inline theme - no FOUC */
+    (function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
@@ -9,7 +12,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.navUser || (typeof locals.user === 'string' ? locals.user : ''),
+    score: locals.score || 0,
+    currentPage: 'ch-3',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 3,
+    challengeName: 'User Profile',
+    challengeType: 'IDOR',
+    challengeDifficulty: 'Medium',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
 
@@ -28,7 +48,7 @@
                                 <%= user.username %>
                             </h3>
                             <span class="status-badge <%= user.isAdmin ? 'status-solved' : 'status-locked' %>">
-                                <%= user.isAdmin ? 'ADMINISTRATOR' : 'GUEST USER' %>
+                                <%= user.isAdmin ? 'ADMINISTRATOR' : 'PLAYER' %>
                             </span>
                         </div>
                     </div>

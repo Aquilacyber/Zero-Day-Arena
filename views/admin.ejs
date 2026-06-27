@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>/* inline theme - no FOUC */
+    (function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/theme.js"></script>
+    <style>
+        /* ── Layout ─────────────────────────────────────── */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+        .stat-card.cyan::before  { background: var(--accent); }
+        .stat-card.purple::before { background: var(--accent-purple); }
+        .stat-card.green::before  { background: var(--success); }
+        .stat-card.yellow::before { background: var(--warning); }
+        .stat-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .stat-num {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .stat-num.cyan   { color: var(--accent); }
+        .stat-num.purple { color: var(--accent-purple); }
+        .stat-num.green  { color: var(--success); }
+        .stat-num.yellow { color: var(--warning); }
+        .stat-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Tabs ───────────────────────────────────────── */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Tables ─────────────────────────────────────── */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .admin-table th {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .admin-table td {
+            padding: 13px 14px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: middle;
+        }
+        .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .admin-table tr:last-child td { border-bottom: none; }
+
+        /* ── Action buttons ──────────────────────────────── */
+        .action-btn {
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .action-btn.danger {
+            color: var(--danger);
+            border-color: rgba(255,23,68,0.3);
+            background: rgba(255,23,68,0.05);
+        }
+        .action-btn.danger:hover {
+            background: rgba(255,23,68,0.15);
+            border-color: var(--danger);
+        }
+        .action-btn.warning {
+            color: var(--warning);
+            border-color: rgba(255,234,0,0.3);
+            background: rgba(255,234,0,0.05);
+        }
+        .action-btn.warning:hover {
+            background: rgba(255,234,0,0.12);
+            border-color: var(--warning);
+        }
+        .action-btn.success {
+            color: var(--success);
+            border-color: rgba(0,230,118,0.3);
+            background: rgba(0,230,118,0.05);
+        }
+        .action-btn.success:hover {
+            background: rgba(0,230,118,0.12);
+            border-color: var(--success);
+        }
+        .action-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* ── Challenge solve bar ─────────────────────────── */
+        .solve-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .solve-bar-track {
+            flex: 1;
+            height: 5px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+        .solve-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-purple));
+            transition: width 0.6s ease;
+        }
+        .solve-count {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* ── Toast ───────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: 28px; right: 28px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            max-width: 320px;
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #toast.ok {
+            background: rgba(0,230,118,0.1);
+            border-color: rgba(0,230,118,0.4);
+            color: var(--success);
+        }
+        #toast.err {
+            background: rgba(255,23,68,0.1);
+            border-color: rgba(255,23,68,0.4);
+            color: var(--danger);
+        }
+
+        /* ── Danger zone ─────────────────────────────────── */
+        .danger-zone {
+            border: 1px solid rgba(255,23,68,0.25);
+            border-radius: 12px;
+            padding: 24px;
+            background: rgba(255,23,68,0.03);
+        }
+        .danger-zone h3 {
+            color: var(--danger);
+            margin: 0 0 8px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .confirm-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 14px;
+        }
+        .confirm-row input {
+            width: 160px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* ── Rank badge ──────────────────────────────────── */
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        .rank-1 { background: #ffd700; color: #000; }
+        .rank-2 { background: #c0c0c0; color: #000; }
+        .rank-3 { background: #cd7f32; color: #000; }
+
+        /* ── Section header ──────────────────────────────── */
+        .section-hd {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .section-hd h2 { margin: 0; font-size: 1.1rem; }
+        .section-hd span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @media (max-width: 1100px) {
+            .admin-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 700px) {
+            .admin-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: adminUser,
+    score: 0,
+    currentPage: 'admin',
+    isAdmin: true
+}) %>
+
+
+<div class="container">
+
+    <!-- ── Stat Cards ───────────────────────────────── -->
+    <div class="admin-grid fade-in">
+        <div class="stat-card cyan">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-num cyan"><%= stats.totalUsers %></div>
+            <div class="stat-sub"><%= stats.activeUsers %> active</div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-label">Total Solves</div>
+            <div class="stat-num green"><%= stats.totalSolves %></div>
+            <div class="stat-sub">across all challenges</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="stat-label">Hints Purchased</div>
+            <div class="stat-num purple"><%= stats.totalHints %></div>
+            <div class="stat-sub">-20pts each</div>
+        </div>
+        <div class="stat-card yellow">
+            <div class="stat-label">Challenges</div>
+            <div class="stat-num yellow"><%= stats.totalChallenges %></div>
+            <div class="stat-sub">web + OSINT</div>
+        </div>
+        <div class="stat-card" style="border-top:2px solid var(--accent-purple);">
+            <div class="stat-label">Teams</div>
+            <div class="stat-num" style="color:var(--accent-purple);"><%= stats.totalTeams || 0 %></div>
+            <div class="stat-sub">registered</div>
+        </div>
+    </div>
+
+    <!-- ── Main Panel ───────────────────────────────── -->
+    <div class="glass-panel fade-in" style="animation-delay:0.1s;">
+
+        <!-- Tabs -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('users', this)">Users</button>
+            <button class="tab-btn" onclick="switchTab('teams', this)">Teams</button>
+            <button class="tab-btn" onclick="switchTab('challenges', this)">Challenges</button>
+            <button class="tab-btn" onclick="switchTab('event', this)">⏱ Event</button>
+            <button class="tab-btn" onclick="switchTab('danger', this)" style="color: rgba(255,23,68,0.6);">Danger Zone</button>
+        </div>
+
+        <!-- ── Tab: Users ──────────────────────────────── -->
+        <div id="tab-users" class="tab-panel active">
+            <div class="section-hd">
+                <h2>Registered Users</h2>
+                <span><%= stats.totalUsers %> total</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th width="40">Rank</th>
+                            <th>Username</th>
+                            <th>Team</th>
+                            <th>Score</th>
+                            <th>Solved</th>
+                            <th>Hints</th>
+                            <th>Last Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% userList.forEach((u, i) => { %>
+                        <tr id="user-row-<%= u.id %>">
+                            <td>
+                                <span class="rank-badge <%= i < 3 ? 'rank-' + (i+1) : '' %>"><%= i+1 %></span>
+                            </td>
+                            <td>
+                                <span style="font-family:var(--font-mono); font-size:0.9rem; color:var(--text-primary); font-weight:600;">
+                                    <%= u.username %>
+                                </span>
+                                <% if (u.username === adminUser) { %>
+                                    <span style="font-size:0.7rem; color:var(--accent); margin-left:6px;">(you)</span>
+                                <% } %>
+                            </td>
+                            <td style="font-size:0.8rem;">
+                                <% if (u.teamName) { %>
+                                    <span style="color:var(--accent-purple); font-weight:600;"><%= u.teamName %></span>
+                                <% } else { %>
+                                    <span style="color:var(--text-muted);">—</span>
+                                <% } %>
+                            </td>
+                            <td style="font-family:var(--font-mono); color:var(--accent); font-weight:700;">
+                                <%= u.score %>
+                            </td>
+                            <td style="color:var(--text-secondary);">
+                                <span style="font-family:var(--font-mono);"><%= u.solved %>/<%= stats.totalChallenges %></span>
+                            </td>
+                            <td style="color:var(--warning); font-family:var(--font-mono);">
+                                <%= u.hints %>
+                            </td>
+                            <td style="color:var(--text-muted); font-size:0.8rem;">
+                                <% if (u.lastActive) { %>
+                                    <%= new Date(u.lastActive).toLocaleDateString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) %>
+                                <% } else { %>
+                                    <span style="opacity:0.4;">—</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    <% if (u.username !== adminUser) { %>
+                                        <button class="action-btn warning"
+                                            onclick="resetUser(<%= u.id %>, '<%= u.username %>')">
+                                            Reset
+                                        </button>
+                                        <button class="action-btn danger"
+                                            onclick="deleteUser(<%= u.id %>, '<%= u.username %>')">
+                                            Delete
+                                        </button>
+                                    <% } else { %>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">—</span>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                    <% if (userList.length === 0) { %>
+                        <tr>
+                            <td colspan="8" style="text-align:center; color:var(--text-muted); padding:40px;">
+                                No users registered yet.
+                            </td>
+                        </tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── Tab: Teams ──────────────────────────────── -->
+        <div id="tab-teams" class="tab-panel">
+            <div class="section-hd">
+                <h2>Registered Teams</h2>
+                <span><%= stats.totalTeams || 0 %> total</span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Team Name</th>
+                            <th>Code</th>
+                            <th>Captain</th>
+                            <th>Members</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% teams.forEach(t => { %>
+                        <tr id="team-row-<%= t.id %>">
+                            <td style="font-weight:700; color:var(--text-primary);"><%= t.name %></td>
+                            <td><span style="font-family:var(--font-mono); font-size:0.85rem; letter-spacing:0.1em; color:var(--accent);"><%= t.code %></span></td>
+                            <td style="color:var(--text-secondary);"><%= t.captain %></td>
+                            <td style="font-family:var(--font-mono); color:var(--text-secondary);"><%= t.memberCount %></td>
+                            <td>
+                                <button class="action-btn danger" onclick="deleteTeam(<%= t.id %>, '<%= t.name %>')">Delete</button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                    <% if (!teams.length) { %>
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:32px;">No teams yet. Teams are created during registration.</td></tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+                <!-- ── Tab: Challenges ─────────────────────────── -->
+        <div id="tab-challenges" class="tab-panel">
+            <div class="section-hd">
+                <h2>Challenge Stats</h2>
+                <span><%= stats.totalChallenges %> challenges</span>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th width="32">#</th>
+                        <th>Challenge</th>
+                        <th>Type</th>
+                        <th>Difficulty</th>
+                        <th>Solve Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% challengeStats.forEach(ch => { %>
+                    <tr>
+                        <td style="color:var(--text-muted); font-family:var(--font-mono); font-size:0.8rem;"><%= ch.id %></td>
+                        <td style="font-weight:600; color:var(--text-primary);"><%= ch.name %></td>
+                        <td style="color:var(--text-secondary); font-size:0.82rem; font-family:var(--font-mono);"><%= ch.type %></td>
+                        <td>
+                            <span class="difficulty-badge difficulty-<%= ch.difficulty.toLowerCase() %>">
+                                <%= ch.difficulty %>
+                            </span>
+                        </td>
+                        <td style="min-width:180px;">
+                            <div class="solve-bar-wrap">
+                                <div class="solve-bar-track">
+                                    <div class="solve-bar-fill" style="width:<%= ch.solveRate %>%;"></div>
+                                </div>
+                                <span class="solve-count">
+                                    <%= ch.solves %>/<%= stats.totalUsers %> · <%= ch.solveRate %>%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── Tab: Event ─────────────────────────────── -->
+        <div id="tab-event" class="tab-panel">
+            <div class="section-hd">
+                <h2>Event Control</h2>
+                <span id="eventStatusBadge" style="font-size:0.78rem; font-family:var(--font-mono); padding:3px 10px; border-radius:20px; background:var(--bg-tertiary);">
+                    <%= event.mode.toUpperCase() %>
+                </span>
+            </div>
+
+            <!-- Live status strip -->
+            <div id="eventStatusStrip" style="margin-bottom:20px; padding:14px 18px; border-radius:10px; border:1px solid;
+                <% if (event.mode === 'ended') { %>border-color:rgba(255,23,68,0.35); background:rgba(255,23,68,0.06);<% } else if (event.mode === 'running') { %>border-color:rgba(0,230,118,0.35); background:rgba(0,230,118,0.05);<% } else if (event.mode === 'scheduled') { %>border-color:rgba(255,234,0,0.35); background:rgba(255,234,0,0.05);<% } else { %>border-color:var(--border); background:var(--bg-secondary);<% } %>
+                font-size:0.85rem;">
+                <% if (event.mode === 'open') { %>
+                    <strong style="color:var(--text-secondary);">Open mode</strong> — no time restrictions. Players can submit flags anytime.
+                <% } else if (event.mode === 'scheduled') { %>
+                    <strong style="color:var(--warning);">Scheduled</strong> — starts <code><%= event.ctfStart ? event.ctfStart.toISOString() : '—' %></code>
+                <% } else if (event.mode === 'running') { %>
+                    <strong style="color:var(--success);">● Running</strong> — ends <code><%= event.ctfEnd ? event.ctfEnd.toISOString() : '—' %></code><% if (event.isFrozen) { %> · <strong style="color:var(--accent);">❄ Scoreboard frozen</strong><% } %>
+                <% } else if (event.mode === 'ended') { %>
+                    <strong style="color:var(--danger);">Ended</strong> — flag submissions are closed. Leaderboard is the final scoreboard.
+                <% } %>
+            </div>
+
+            <!-- Config form -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.8px;">Event Name</label>
+                    <input type="text" id="evtName" value="<%= event.name %>" placeholder="Aquila CTF" style="margin:0; width:100%; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.8px;">Start Time</label>
+                    <input type="datetime-local" id="evtStart" value="<%= event.ctfStart ? event.ctfStart.toISOString().slice(0,16) : '' %>" style="margin:0; width:100%; box-sizing:border-box; font-family:var(--font-mono);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">Leave blank → open immediately</div>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.8px;">End Time</label>
+                    <input type="datetime-local" id="evtEnd" value="<%= event.ctfEnd ? event.ctfEnd.toISOString().slice(0,16) : '' %>" style="margin:0; width:100%; box-sizing:border-box; font-family:var(--font-mono);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">Leave blank → no end time</div>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.8px;">Scoreboard Freeze</label>
+                    <input type="datetime-local" id="evtFreeze" value="<%= event.ctfFreeze ? event.ctfFreeze.toISOString().slice(0,16) : '' %>" style="margin:0; width:100%; box-sizing:border-box; font-family:var(--font-mono);">
+                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">Leave blank → leaderboard always live</div>
+                </div>
+                <div style="display:flex; align-items:flex-end; gap:10px; grid-column:2/3;">
+                    <button class="action-btn success" style="padding:9px 20px; font-size:0.85rem;" onclick="saveEvent()">Save Config</button>
+                    <button class="action-btn warning" style="padding:9px 16px; font-size:0.85rem;" onclick="startNow()">Start Now</button>
+                    <button class="action-btn danger" style="padding:9px 16px; font-size:0.85rem;" onclick="clearEvent()">Clear</button>
+                </div>
+            </div>
+
+            <!-- Quick presets -->
+            <div style="border-top:1px solid var(--border); padding-top:18px;">
+                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px;">Quick Presets</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="action-btn success" style="padding:7px 14px;" onclick="applyPreset(1)">1 hour</button>
+                    <button class="action-btn success" style="padding:7px 14px;" onclick="applyPreset(2)">2 hours</button>
+                    <button class="action-btn success" style="padding:7px 14px;" onclick="applyPreset(4)">4 hours</button>
+                    <button class="action-btn success" style="padding:7px 14px;" onclick="applyPreset(8)">8 hours</button>
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">Presets start the event now and set a freeze 15 minutes before the end.</div>
+            </div>
+        </div>
+
+                <!-- ── Tab: Danger Zone ───────────────────────── -->
+        <div id="tab-danger" class="tab-panel">
+            <div class="section-hd">
+                <h2 style="color:var(--danger);">Danger Zone</h2>
+                <span>Irreversible operations</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+
+                <!-- Manual solve grant -->
+                <div class="danger-zone" style="border-color:rgba(0,230,118,0.25); background:rgba(0,230,118,0.02);">
+                    <h3 style="color:var(--success);">⚡ Manually Grant a Solve</h3>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 12px;">
+                        Award a challenge solve to any user without requiring them to submit the flag.
+                    </p>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                        <div>
+                            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">User</label>
+                            <select id="grantUserId" style="width:180px; padding:8px 12px; font-size:0.85rem; margin:0;">
+                                <% userList.forEach(u => { %>
+                                    <option value="<%= u.id %>"><%= u.username %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Challenge</label>
+                            <select id="grantChallengeId" style="width:220px; padding:8px 12px; font-size:0.85rem; margin:0;">
+                                <% challengeStats.forEach(ch => { %>
+                                    <option value="<%= ch.id %>"><%= ch.id %>. <%= ch.name %> (<%= ch.type %>)</option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <button class="action-btn success" style="padding:8px 16px;" onclick="grantSolve()">
+                            Grant Solve
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reset all progress -->
+                <div class="danger-zone">
+                    <h3>☢ Reset All Progress</h3>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin:0;">
+                        Wipes every solve, hint purchase, and score across all users.
+                        User accounts are kept. This cannot be undone.
+                    </p>
+                    <div class="confirm-row">
+                        <input type="text" id="resetConfirmInput" placeholder='Type RESET to confirm' autocomplete="off" />
+                        <button class="action-btn danger" style="padding:8px 16px;" onclick="resetAll()">
+                            Reset Platform
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div><!-- /glass-panel -->
+
+</div><!-- /container -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── Tab switching ──────────────────────────────────────────────
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, ok) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + (ok ? 'ok' : 'err');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+}
+
+// ── API helper ─────────────────────────────────────────────────
+async function adminPost(url, body) {
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: Object.entries(body).map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')
+    });
+    return res.json();
+}
+
+// ── Reset user progress ────────────────────────────────────────
+async function resetUser(id, name) {
+    if (!confirm(`Reset all progress for "${name}"? Their account stays, all solves and hints are wiped.`)) return;
+    const data = await adminPost('/admin/reset-user', { userId: id });
+    toast(data.message, data.success);
+    if (data.success) setTimeout(() => location.reload(), 1000);
+}
+
+// ── Delete user ────────────────────────────────────────────────
+async function deleteUser(id, name) {
+    if (!confirm(`Permanently delete "${name}" and all their data? This cannot be undone.`)) return;
+    const data = await adminPost('/admin/delete-user', { userId: id });
+    toast(data.message, data.success);
+    if (data.success) {
+        const row = document.getElementById('user-row-' + id);
+        if (row) {
+            row.style.opacity = '0';
+            row.style.transition = 'opacity 0.4s';
+            setTimeout(() => row.remove(), 400);
+        }
+    }
+}
+
+// ── Grant solve ────────────────────────────────────────────────
+async function grantSolve() {
+    const userId = document.getElementById('grantUserId').value;
+    const challengeId = document.getElementById('grantChallengeId').value;
+    const data = await adminPost('/admin/mark-solved', { userId, challengeId });
+    toast(data.message, data.success);
+}
+
+// ── Delete team ───────────────────────────────────────────────
+async function deleteTeam(id, name) {
+    if (!confirm(`Delete team "${name}"? All members will become solo players.`)) return;
+    const data = await adminPost('/admin/delete-team', { teamId: id });
+    toast(data.message, data.success);
+    if (data.success) {
+        const row = document.getElementById('team-row-' + id);
+        if (row) { row.style.opacity = '0'; row.style.transition = 'opacity 0.4s'; setTimeout(() => row.remove(), 400); }
+    }
+}
+
+// ── Event config ──────────────────────────────────────────────
+function toLocalISO(date) {
+    // datetime-local input needs local time without 'Z'
+    const d = new Date(date);
+    const offset = d.getTimezoneOffset() * 60000;
+    return new Date(d - offset).toISOString().slice(0, 16);
+}
+
+async function saveEvent() {
+    const name   = document.getElementById('evtName').value.trim();
+    const start  = document.getElementById('evtStart').value;
+    const end    = document.getElementById('evtEnd').value;
+    const freeze = document.getElementById('evtFreeze').value;
+
+    const toISO = v => v ? new Date(v).toISOString() : '';
+    const data = await adminPost('/admin/event/save', {
+        name, start: toISO(start), end: toISO(end), freeze: toISO(freeze)
+    });
+    toast(data.message, data.success);
+    if (data.success) setTimeout(() => location.reload(), 800);
+}
+
+async function startNow() {
+    const data = await adminPost('/admin/event/start-now', {});
+    toast(data.message, data.success);
+    if (data.success) setTimeout(() => location.reload(), 800);
+}
+
+async function clearEvent() {
+    if (!confirm('Clear all event timing? Platform returns to open mode.')) return;
+    const data = await adminPost('/admin/event/clear', {});
+    toast(data.message, data.success);
+    if (data.success) setTimeout(() => location.reload(), 800);
+}
+
+function applyPreset(hours) {
+    const now  = new Date();
+    const end  = new Date(now.getTime() + hours * 60 * 60 * 1000);
+    const freeze = new Date(end.getTime() - 15 * 60 * 1000);
+    document.getElementById('evtStart').value  = toLocalISO(now);
+    document.getElementById('evtEnd').value    = toLocalISO(end);
+    document.getElementById('evtFreeze').value = toLocalISO(freeze);
+    toast(`Preset: ${hours}h event — click Save Config to apply.`, true);
+}
+
+// ── Reset all ──────────────────────────────────────────────────
+async function resetAll() {
+    const confirm_val = document.getElementById('resetConfirmInput').value.trim();
+    if (confirm_val !== 'RESET') {
+        toast('Type RESET exactly to confirm.', false);
+        return;
+    }
+    if (!confirm('⚠ This will wipe ALL progress for EVERY user. Are you absolutely sure?')) return;
+    const data = await adminPost('/admin/reset-all', { confirm: confirm_val });
+    toast(data.message, data.success);
+    if (data.success) setTimeout(() => location.reload(), 1200);
+}
+</script>
+</body>
+</html>

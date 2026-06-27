@@ -1,13 +1,63 @@
-node_modules/
-aquila.json
+# ============================================================
+# AquilaCyber CTF Platform — Docker Ignore
+# ============================================================
+
+# Git
 .git/
 .gitignore
-*.log
-.env
-.DS_Store
+
+# Dependencies (installed fresh in image)
+node_modules/
+
+# Runtime data (mounted as volumes)
+aquila.json
+data-persist/
+event-config.json
+
+# Flag files (generated at container startup)
+flag_calc.txt
+flag_xxe.txt
+ping_sandbox/flag_*.txt
+
+# User uploads
 uploads/*
-README.md
+
+# Dev Docker local data
+dev-data/
+dev-uploads/
+
+# Environment secrets (never bake into image)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# AI assistant dirs
 .gemini/
-docker-compose.yml
-docker-compose.override.yml
+.claude/
+
+# Lockfiles not needed in image
+pnpm-lock.yaml
+
+# Dev-only files
+Dockerfile.dev
+docker-compose.dev.yml
+
+# Docs (not needed in image)
+README.md
+docs/
+
+# Phantom Insider temp build artifacts
 phantom-insider/_tmp_gen/
+
+# Docker override files
+docker-compose.override.yml

@@ -9,7 +9,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-2',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 2,
+    challengeName: 'XSS Search',
+    challengeType: 'Reflected XSS',
+    challengeDifficulty: 'Easy',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <a href="/" class="btn" style="margin-bottom: 20px; display: inline-block;">&larr; Dashboard</a>
 

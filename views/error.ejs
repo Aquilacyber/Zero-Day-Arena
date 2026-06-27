@@ -135,7 +135,17 @@
     </style>
 </head>
 
-<body>
+<body class="has-nav">
+<% if (locals.user) { %>
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: 0,
+    currentPage: '',
+    isAdmin: false
+}) %>
+<% } %>
+
+
     <div class="error-bg-particles"></div>
     <div class="container">
         <div class="error-container">

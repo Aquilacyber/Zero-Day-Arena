@@ -9,7 +9,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-9',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 9,
+    challengeName: 'XML Parser',
+    challengeType: 'XXE',
+    challengeDifficulty: 'Hard',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <h1>XML Parser</h1>
         <p style="color: var(--text-secondary);">XXE Challenge - Parse XML data</p>

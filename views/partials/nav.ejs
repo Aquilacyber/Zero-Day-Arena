@@ -1,0 +1,171 @@
+<%
+// nav.ejs — Global navigation sidebar
+// Pass: user (username), score (int), currentPage ('dashboard'|'leaderboard'|'profile'|'admin')
+// Optional: isAdmin (bool)
+const _navUser    = locals.user    || locals.navUser    || '';
+const _navScore   = locals.score   || locals.navScore   || 0;
+const _navPage    = locals.currentPage || '';
+const _navIsAdmin = locals.isAdmin || false;
+const _navInitial = _navUser ? _navUser[0].toUpperCase() : '?';
+%>
+
+<!-- Mobile top bar -->
+<div class="aq-topbar">
+    <div class="aq-topbar-brand">AQUILA<span>CTF</span></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--accent);"><%= _navScore %>pts</span>
+        <button class="aq-hamburger" id="navHamburger" aria-label="Menu">☰</button>
+    </div>
+</div>
+
+<!-- Overlay for mobile -->
+<div class="aq-nav-overlay" id="navOverlay"></div>
+
+<!-- Sidebar -->
+<nav class="aq-nav" id="aqNav" role="navigation" aria-label="Main navigation">
+
+    <!-- Brand -->
+    <div class="aq-nav-brand">
+        <div class="aq-nav-wordmark">
+            <span class="org">AquilaCyber</span>
+            <span class="product">DEFENDERS CTF<span></span></span>
+        </div>
+    </div>
+
+    <!-- Player card -->
+    <div class="aq-nav-player">
+        <div class="aq-nav-avatar"><%= _navInitial %></div>
+        <div class="aq-nav-player-info">
+            <div class="aq-nav-player-name"><%= _navUser %></div>
+            <div class="aq-nav-player-score" id="navScore"><%= _navScore %> pts</div>
+        </div>
+    </div>
+
+    <!-- Links -->
+    <div class="aq-nav-links">
+        <div class="aq-nav-section-label">Platform</div>
+
+        <a href="/" class="aq-nav-link <%= _navPage === 'dashboard' ? 'active' : '' %>">
+            <span class="nav-icon">⊞</span> Dashboard
+        </a>
+        <a href="/leaderboard" class="aq-nav-link <%= _navPage === 'leaderboard' ? 'active' : '' %>">
+            <span class="nav-icon">🏆</span> Leaderboard
+        </a>
+
+        <div class="aq-nav-divider"></div>
+        <div class="aq-nav-section-label">Challenges</div>
+
+        <a href="/challenge/login"       class="aq-nav-link <%= _navPage === 'ch-1'  ? 'active' : '' %>"><span class="nav-icon">💉</span> SQLi Login</a>
+        <a href="/challenge/search"      class="aq-nav-link <%= _navPage === 'ch-2'  ? 'active' : '' %>"><span class="nav-icon">🔍</span> XSS Search</a>
+        <a href="/challenge/profile"     class="aq-nav-link <%= _navPage === 'ch-3'  ? 'active' : '' %>"><span class="nav-icon">👤</span> IDOR Profile</a>
+        <a href="/challenge/ping"        class="aq-nav-link <%= _navPage === 'ch-4'  ? 'active' : '' %>"><span class="nav-icon">📡</span> CMDi Ping</a>
+        <a href="/challenge/vault"       class="aq-nav-link <%= _navPage === 'ch-5'  ? 'active' : '' %>"><span class="nav-icon">🔐</span> JWT Vault</a>
+        <a href="/challenge/calculator"  class="aq-nav-link <%= _navPage === 'ch-6'  ? 'active' : '' %>"><span class="nav-icon">🧮</span> RCE Calc</a>
+        <a href="/challenge/csrf"        class="aq-nav-link <%= _navPage === 'ch-7'  ? 'active' : '' %>"><span class="nav-icon">🎭</span> CSRF</a>
+        <a href="/challenge/upload"      class="aq-nav-link <%= _navPage === 'ch-8'  ? 'active' : '' %>"><span class="nav-icon">📁</span> File Upload</a>
+        <a href="/challenge/xxe"         class="aq-nav-link <%= _navPage === 'ch-9'  ? 'active' : '' %>"><span class="nav-icon">📄</span> XXE Parser</a>
+        <a href="/challenge/ssrf"        class="aq-nav-link <%= _navPage === 'ch-10' ? 'active' : '' %>"><span class="nav-icon">🕸</span> SSRF</a>
+        <a href="/challenge/phantom-insider" class="aq-nav-link <%= _navPage === 'ch-11' ? 'active' : '' %>"><span class="nav-icon">🕵️</span> Phantom OSINT</a>
+
+        <% if (_navIsAdmin) { %>
+        <div class="aq-nav-divider"></div>
+        <div class="aq-nav-section-label">Admin</div>
+        <a href="/admin" class="aq-nav-link <%= _navPage === 'admin' ? 'active' : '' %>"
+           style="color:var(--warning);">
+            <span class="nav-icon">⚙</span> Control Panel
+        </a>
+        <% } %>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="aq-nav-footer">
+        <button id="themeToggle" class="theme-toggle" title="Toggle theme (Ctrl+J)" style="flex-shrink:0;">
+            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                style="display:none;">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+        <a href="/export-progress" class="aq-nav-link" style="flex:1; font-size:0.72rem; padding:6px 8px;" title="Download progress report">
+            <span class="nav-icon">⬇</span> Export
+        </a>
+        <a href="/auth/logout" class="aq-nav-link" style="color:var(--danger); font-size:0.78rem; padding:6px 10px;">
+            <span class="nav-icon">⏻</span>
+        </a>
+    </div>
+</nav>
+
+<script src="/theme.js"></script>
+<script>
+(function() {
+    // ── Mobile nav toggle ────────────────────────────────
+    const hamburger = document.getElementById('navHamburger');
+    const nav       = document.getElementById('aqNav');
+    const overlay   = document.getElementById('navOverlay');
+
+    function openNav() {
+        nav.classList.add('open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeNav() {
+        nav.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    if (hamburger) hamburger.addEventListener('click', openNav);
+    if (overlay)   overlay.addEventListener('click', closeNav);
+
+    nav.querySelectorAll('.aq-nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeNav();
+        });
+    });
+
+    // ── Theme toggle (Bug 2 fix) ─────────────────────────
+    // The nav owns the toggle button — this is the single handler
+    // that works across every page via the shared nav partial.
+    const themeBtn  = document.getElementById('themeToggle');
+    const moonIcon  = document.getElementById('moonIcon');
+    const sunIcon   = document.getElementById('sunIcon');
+    const html      = document.documentElement;
+
+    function applyTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (moonIcon && sunIcon) {
+            moonIcon.style.display = theme === 'dark'  ? 'block' : 'none';
+            sunIcon.style.display  = theme === 'light' ? 'block' : 'none';
+        }
+    }
+
+    // Initialise icon state from saved theme
+    applyTheme(localStorage.getItem('theme') || 'dark');
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+    }
+
+    // Ctrl+J shortcut
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
+            e.preventDefault();
+            if (themeBtn) themeBtn.click();
+        }
+    });
+})();
+</script>

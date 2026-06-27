@@ -9,7 +9,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-10',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 10,
+    challengeName: 'URL Fetcher',
+    challengeType: 'SSRF',
+    challengeDifficulty: 'Medium',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <h1>URL Fetcher</h1>
         <p style="color: var(--text-secondary);">SSRF Challenge - Fetch content from any URL</p>

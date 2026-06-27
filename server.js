@@ -11,29 +11,48 @@ const PORT = process.env.PORT || 3000;
 
 // Config
 const { buildChallengeCards, TOTAL_CHALLENGES } = require('./config/challenges');
+const { getEventState } = require('./config/event');
 
-// Auto-generate flag files if missing (for native npm start after fresh git clone)
-const flagFiles = [
-    { path: path.join(__dirname, 'flag_calc.txt'), content: 'CTF{rce_eval_is_evil_math}' },
-    { path: path.join(__dirname, 'flag_xxe.txt'), content: 'CTF{xxe_entity_expansion_pro}' },
-    { path: path.join(__dirname, 'ping_sandbox', 'flag_ping.txt'), content: 'CTF{cmd_inj_root_access_pwned}' }
-];
-flagFiles.forEach(({ path: fp, content }) => {
-    if (!fs.existsSync(fp)) {
-        fs.mkdirSync(path.dirname(fp), { recursive: true });
-        fs.writeFileSync(fp, content);
+// Auto-generate flag files if missing.
+// Bug fix 2: read flag content from DB (single source of truth) instead of hardcoding.
+// Falls back to DB values at startup so file contents always match the flags table.
+const generateFlagFiles = async () => {
+    const fileChallenges = [
+        { path: path.join(__dirname, 'flag_calc.txt'),                   challengeId: 6  },
+        { path: path.join(__dirname, 'flag_xxe.txt'),                    challengeId: 9  },
+        { path: path.join(__dirname, 'ping_sandbox', 'flag_ping.txt'),   challengeId: 4  },
+    ];
+    for (const { path: fp, challengeId } of fileChallenges) {
+        if (!fs.existsSync(fp)) {
+            try {
+                const row = await db.get('SELECT flag FROM flags WHERE challenge_id = ?', [challengeId]);
+                if (row) {
+                    const plain = Buffer.from(row.flag, 'base64').toString('utf-8').trim();
+                    fs.mkdirSync(path.dirname(fp), { recursive: true });
+                    fs.writeFileSync(fp, plain);
+                    console.log(`[flags] Generated ${path.basename(fp)}`);
+                }
+            } catch (err) {
+                console.error(`[flags] Could not generate ${path.basename(fp)}:`, err.message);
+            }
+        }
     }
-});
+};
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
-app.use(cookieParser('secret_key_for_signed_cookies'));
+app.use(cookieParser(process.env.SESSION_SECRET || 'secret_key_for_signed_cookies')); // Bug fix 7: use SESSION_SECRET env var
 app.use(session({
     secret: process.env.SESSION_SECRET || 'aquila_ctf_platform_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000,   // 24 hours
+        httpOnly: true,                  // Bug fix 1: JS cannot read the session cookie
+        secure: process.env.NODE_ENV === 'production', // HTTPS-only in prod
+        sameSite: 'lax'                  // CSRF protection at cookie level
+    }
 }));
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -44,12 +63,22 @@ app.set('view engine', 'ejs');
 const authRoutes = require('./routes/auth');
 const challengeRoutes = require('./routes/challenges');
 const apiRoutes = require('./routes/api');
+const adminRoutes = require('./routes/admin');
 
 app.use('/auth', authRoutes);
 app.use('/challenge', challengeRoutes);
+app.use('/admin', adminRoutes);
 // Internal endpoint for SSRF challenge (must be at root level, not under /challenge)
-app.get('/internal/flag', (req, res) => {
-    res.send('CTF{ssrf_internal_access_hacker}');
+app.get('/internal/flag', async (req, res) => {
+    // Bug fix 1: flag served from DB, not hardcoded
+    try {
+        const row = await db.get('SELECT flag FROM flags WHERE challenge_id = ?', [10]);
+        const plain = row ? Buffer.from(row.flag, 'base64').toString('utf-8').trim() : '';
+        res.send(plain);
+    } catch (err) {
+        console.error('[internal/flag]', err);
+        res.status(500).send('Error');
+    }
 });
 
 app.use('/', apiRoutes);
@@ -73,7 +102,7 @@ app.get('/', requireAuth, async (req, res) => {
         let totalPenalty = 0;
         const progressRows = await db.query('SELECT hints_used FROM user_progress WHERE user_id = ?', [userId]);
         progressRows.forEach(row => {
-            totalPenalty += (row.hints_used * 20);
+            totalPenalty += (row.hints_used || 0) * 20;
         });
 
         const finalScore = Math.max(0, score - totalPenalty);
@@ -87,16 +116,29 @@ app.get('/', requireAuth, async (req, res) => {
         const seconds = elapsedSeconds % 60;
         const timeDisplay = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+        const event = getEventState();
+
+        // Fetch team info if user is on a team
+        let team = null;
+        if (req.session.teamId) {
+            try {
+                team = await db.get('SELECT name, code FROM teams WHERE id = ?', [req.session.teamId]);
+            } catch (_) {}
+        }
+
         res.render('index', {
-            title: 'Aquila CTF',
+            title: event.name,
             score: finalScore,
             progress: progressPercent,
             solved: solved,
             timeDisplay: timeDisplay,
             startTime: req.session.startTime,
             user: req.session.username,
+            isAdmin: req.session.isAdmin || false,
             challenges: buildChallengeCards(solved),
-            totalChallenges: TOTAL_CHALLENGES
+            totalChallenges: TOTAL_CHALLENGES,
+            event,
+            team,
         });
     } catch (err) {
         console.error(err);
@@ -118,6 +160,9 @@ app.use((req, res) => {
         icon: '🔍'
     });
 });
+
+// Generate flag files from DB after everything is initialised
+generateFlagFiles().catch(err => console.error('[flags] Init error:', err));
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);

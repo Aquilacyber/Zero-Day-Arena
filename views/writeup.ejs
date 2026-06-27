@@ -10,7 +10,15 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: 0,
+    currentPage: '',
+    isAdmin: false
+}) %>
+
+
     <div class="container">
         <header style="margin-bottom: 30px;">
             <div style="display: flex; align-items: center; gap: 12px;">

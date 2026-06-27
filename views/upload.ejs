@@ -9,7 +9,24 @@
     <script src="/theme.js"></script>
 </head>
 
-<body>
+<body class="has-nav">
+<%- include('partials/nav', {
+    user: locals.user || '',
+    score: locals.score || 0,
+    currentPage: 'ch-8',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 8,
+    challengeName: 'File Manager',
+    challengeType: 'File Upload',
+    challengeDifficulty: 'Easy',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+
     <div class="container">
         <h1>File Manager</h1>
         <p style="color: var(--text-secondary);">File Upload Challenge - Upload files to the server</p>

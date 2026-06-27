@@ -1,0 +1,59 @@
+# ============================================================
+# AquilaCyber CTF Platform — Dev Docker Compose
+# ============================================================
+# Usage:
+#   Start:   docker compose -f docker-compose.dev.yml up --build
+#   Stop:    docker compose -f docker-compose.dev.yml down
+#   Reset:   docker compose -f docker-compose.dev.yml down -v
+#   Logs:    docker compose -f docker-compose.dev.yml logs -f
+#   Shell:   docker compose -f docker-compose.dev.yml exec aquila-ctf-dev sh
+# ============================================================
+#
+# What's different from production:
+#   - Uses Dockerfile.dev (single stage, full node:18, no build optimisation)
+#   - Source code is mounted live — edit files on your host, server auto-restarts
+#   - NODE_ENV=development
+#   - DB stored locally at ./dev-data/aquila.json (easy to inspect/delete)
+#   - Uploads stored locally at ./dev-uploads/
+#   - Container name is aquila-ctf-dev (won't clash with a running prod container)
+# ============================================================
+
+services:
+  aquila-ctf-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: aquila-ctf-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - SESSION_SECRET=dev_session_secret_not_for_prod
+      - JWT_SECRET=dev_jwt_secret_not_for_prod
+      - DB_PATH=/app/data-persist/aquila.json
+    volumes:
+      # ── Live source mount ──────────────────────────────────────
+      # Your host files → /app inside the container.
+      # node --watch detects changes and restarts automatically.
+      # node_modules is excluded via the anonymous volume below.
+      - .:/app
+
+      # ── Protect node_modules ──────────────────────────────────
+      # Prevents the host (which may have no node_modules, or a
+      # different OS/arch) from overwriting the container's modules.
+      - /app/node_modules
+
+      # ── Persist generated Phantom Insider assets ───────────────
+      # generate.js runs once at build time. This keeps the output
+      # even if you mount over the phantom-insider/ directory.
+      - /app/phantom-insider/static
+
+      # ── Local DB & uploads (easy to inspect on host) ──────────
+      - ./dev-data:/app/data-persist
+      - ./dev-uploads:/app/uploads
+
+    restart: unless-stopped
+
+# No named volumes — everything is local folders for easy inspection.
+# Add ./dev-data and ./dev-uploads to your .gitignore.
