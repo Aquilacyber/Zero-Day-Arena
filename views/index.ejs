@@ -89,10 +89,10 @@
                     <div class="stat-value"><%= score %></div>
                     <div class="score-breakdown">
                         <div class="sb-row">
-                            <span>Solves (<%= solved %>×100)</span>
-                            <span class="sb-positive">+<%= solved * 100 %></span>
+                            <span>Solves (<%= solvedCount %>×100)</span>
+                            <span class="sb-positive">+<%= solvedCount * 100 %></span>
                         </div>
-                        <% const hintsTotal = Math.max(0, solved * 100 - score); %>
+                        <% const hintsTotal = Math.max(0, solvedCount * 100 - score); %>
                         <% if (hintsTotal > 0) { %>
                         <div class="sb-row">
                             <span>Hint penalty</span>
@@ -111,7 +111,7 @@
         <!-- Progress bar -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);">
-                <%= solved %> / <%= totalChallenges %> CHALLENGES
+                <%= solvedCount %> / <%= totalChallenges %> CHALLENGES
             </span>
             <span style="font-size:0.72rem;color:var(--accent);font-family:var(--font-mono);">
                 <%= progress %>%
@@ -281,7 +281,7 @@
                 </div>
                 <div style="text-align:center;">
                     <div style="font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Challenges</div>
-                    <div style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--success);"><%= solved %>/<%= totalChallenges %></div>
+                    <div style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--success);"><%= solvedCount %>/<%= totalChallenges %></div>
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:0.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Date</div>

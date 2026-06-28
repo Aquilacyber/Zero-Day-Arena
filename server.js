@@ -42,6 +42,17 @@ const generateFlagFiles = async () => {
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
+// Bug fix: express's body parsers leave req.body as `undefined` (not `{}`)
+// when a request has no matching Content-Type — e.g. a POST with no body,
+// or certain CSRF-style cross-origin requests. Any route reading
+// req.body.someField in that case throws "Cannot read properties of
+// undefined", crashing the request with a 500 and leaking a stack trace.
+// This is especially bad here since it's attack-shaped traffic that
+// triggers it. Normalise req.body to always be an object.
+app.use((req, res, next) => {
+    if (req.body === undefined) req.body = {};
+    next();
+});
 app.use(cookieParser(process.env.SESSION_SECRET || 'secret_key_for_signed_cookies')); // Bug fix 7: use SESSION_SECRET env var
 app.use(session({
     secret: process.env.SESSION_SECRET || 'aquila_ctf_platform_secret_key',
@@ -130,7 +141,8 @@ app.get('/', requireAuth, async (req, res) => {
             title: event.name,
             score: finalScore,
             progress: progressPercent,
-            solved: solved,
+            solved: solved,              // array of solved challenge IDs (for buildChallengeCards)
+            solvedCount: solved.length,  // scalar count for display in templates
             timeDisplay: timeDisplay,
             startTime: req.session.startTime,
             user: req.session.username,

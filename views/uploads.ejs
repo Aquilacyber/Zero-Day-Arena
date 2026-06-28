@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploaded Files — Aquila CTF</title>
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="has-nav">
+
+<%- include('partials/nav', {
+    user: locals.navUser || '',
+    score: 0,
+    currentPage: 'ch-8',
+    isAdmin: locals.isAdmin || false
+}) %>
+
+<%- include('partials/challenge_header', {
+    challengeId: 8,
+    challengeName: 'File Manager',
+    challengeType: 'File Upload',
+    challengeDifficulty: 'Easy',
+    challengePoints: 100,
+    challengeSolved: false
+}) %>
+
+<div class="container">
+    <div class="glass-panel">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+            <h2 style="margin:0;">Directory Listing</h2>
+            <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);background:var(--bg-tertiary);padding:3px 8px;border-radius:4px;">/uploads/</span>
+        </div>
+
+        <% if (files.length === 0) { %>
+        <div class="empty-state">
+            <div class="es-icon" style="font-size:2rem;">📂</div>
+            <div class="es-title">No files uploaded yet</div>
+            <div class="es-text">Upload a file first using the <a href="/challenge/upload">File Manager</a>.</div>
+        </div>
+        <% } else { %>
+        <table style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align:left;padding:8px 12px;font-size:0.68rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);border-bottom:1px solid var(--border);">Filename</th>
+                    <th style="text-align:left;padding:8px 12px;font-size:0.68rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);border-bottom:1px solid var(--border);">Link</th>
+                </tr>
+            </thead>
+            <tbody>
+            <% files.forEach(function(file) { %>
+                <tr>
+                    <td style="padding:11px 12px;font-family:var(--font-mono);font-size:0.85rem;color:var(--text-primary);border-bottom:1px solid rgba(255,255,255,0.03);"><%= file %></td>
+                    <td style="padding:11px 12px;border-bottom:1px solid rgba(255,255,255,0.03);">
+                        <a href="/uploads/<%= file %>" style="color:var(--accent);font-size:0.82rem;" target="_blank">Open ↗</a>
+                    </td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+        <% } %>
+
+        <% if (flag) { %>
+        <div style="margin-top:20px;padding:14px 18px;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);border-radius:8px;">
+            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--success);margin-bottom:4px;font-family:var(--font-mono);">Flag Retrieved</div>
+            <code style="font-family:var(--font-mono);font-size:0.95rem;color:var(--success);word-break:break-all;"><%= flag %></code>
+        </div>
+        <% } %>
+    </div>
+
+    <%- include('partials/hint_script') %>
+</div>
+</body>
+</html>

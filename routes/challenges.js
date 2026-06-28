@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
             res.render('login', { ...navCtx(req), error: 'Invalid credentials' });
         }
     } catch (err) {
-        res.render('login', { error: 'Database error: ' + err.message });
+        res.render('login', { ...navCtx(req), error: 'Database error: ' + err.message });
     }
 });
 
@@ -121,7 +121,7 @@ router.post('/ping', (req, res) => {
     const ip = (req.body.ip || '').trim();
 
     if (!ip) {
-        return res.render('ping', { output: 'Error: No target provided.' });
+        return res.render('ping', { ...navCtx(req), output: 'Error: No target provided.' });
     }
 
     // ── Intentional WAF (Challenge 4 design notes) ──────────────────────────
@@ -156,9 +156,7 @@ router.post('/ping', (req, res) => {
 
     const isBlocked = wafBlacklist.some(rx => rx.test(ip));
     if (isBlocked) {
-        return res.render('ping', {
-            output: '[ WAF BLOCKED ] Restricted characters or filenames detected.\nHint: the WAF has gaps — think about what it does NOT check.'
-        });
+        return res.render('ping', { ...navCtx(req), output: '[ WAF BLOCKED ] Restricted characters or filenames detected.\nHint: the WAF has gaps — think about what it does NOT check.' });
     }
 
     const pingFlag = process.platform === 'win32' ? '-n' : '-c';
@@ -168,7 +166,7 @@ router.post('/ping', (req, res) => {
         `ping ${pingFlag} 1 ${ip}`,
         { timeout: 10000, cwd: sandboxPath, shell: true },
         (error, stdout, stderr) => {
-            res.render('ping', { output: stdout || stderr || error?.message || 'No output.' });
+            res.render('ping', { ...navCtx(req), output: stdout || stderr || error?.message || 'No output.' });
         }
     );
 });
@@ -288,14 +286,10 @@ router.all('/csrf/update', async (req, res) => {
     const isCsrf = (origin && !origin.includes(host)) || (!origin && referer && !referer.includes(host));
 
     if (isCsrf) {
-        return res.render('csrf', {
-            title: 'Settings Panel - CSRF Challenge',
-            settings: newSettings,
-            message: `Settings updated! Flag: ${await getFlag(7)}`
-        });
+        return res.render('csrf', { ...navCtx(req), title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: `Settings updated! Flag: ${await getFlag(7)}` });
     }
 
-    res.render('csrf', { title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: 'Settings updated successfully!' });
+    res.render('csrf', { ...navCtx(req), title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: 'Settings updated successfully!' });
 });
 
 // Challenge 8: File Upload
@@ -328,24 +322,22 @@ router.get('/upload', (req, res) => {
 router.post('/upload', upload.single('file'), (req, res) => {
     // VULNERABLE: No file type validation
     if (!req.file) {
-        return res.render('upload', { title: 'File Manager - Upload Challenge', message: 'No file uploaded' });
+        return res.render('upload', { ...navCtx(req), title: 'File Manager - Upload Challenge', message: 'No file uploaded' });
     }
 
-    res.render('upload', {
-        title: 'File Manager - Upload Challenge',
-        message: `File uploaded: ${req.file.filename}. Access the directory listing at /challenge/uploads to verify.`
-    });
+    res.render('upload', { ...navCtx(req), title: 'File Manager - Upload Challenge', message: `File uploaded: ${req.file.filename}. Access the directory listing at /challenge/uploads to verify.` });
 });
 
 // Serve uploaded files with directory listing
 router.get('/uploads', async (req, res) => {
-    const files = fs.readdirSync(uploadDir);
-    let html = '<h1>Uploaded Files</h1><ul>';
-    files.forEach(file => {
-        html += `<li><a href="/uploads/${file}">${file}</a></li>`;
+    // Bug fix 3: was sending raw unstyled HTML — now renders proper EJS view with nav
+    const files = fs.readdirSync(uploadDir).filter(f => f !== '.gitkeep');
+    const flag8 = await getFlag(8);
+    res.render('uploads', {
+        ...navCtx(req),
+        files,
+        flag: flag8,
     });
-    const flag8 = await getFlag(8); html += `</ul><p>Flag: ${flag8}</p>`;
-    res.send(html);
 });
 
 // Challenge 9: XXE (XML Parser)
@@ -411,9 +403,9 @@ router.post('/xxe', (req, res) => {
         
         const result = dataMatch ? dataMatch[1] : 'No data found';
 
-        res.render('xxe', { title: 'XML Parser - XXE Challenge', result: result });
+        res.render('xxe', { ...navCtx(req), title: 'XML Parser - XXE Challenge', result: result });
     } catch (e) {
-        res.render('xxe', { title: 'XML Parser - XXE Challenge', result: 'Error: ' + e.message });
+        res.render('xxe', { ...navCtx(req), title: 'XML Parser - XXE Challenge', result: 'Error: ' + e.message });
     }
 });
 
@@ -427,7 +419,7 @@ router.post('/ssrf', async (req, res) => {
 
     // Bug fix 5: guard against empty URL before making any request
     if (!url) {
-        return res.render('ssrf', { title: 'URL Fetcher - SSRF Challenge', content: 'Error: No URL provided.' });
+        return res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: 'Error: No URL provided.' });
     }
 
     try {
@@ -442,10 +434,10 @@ router.post('/ssrf', async (req, res) => {
         const body = typeof response.data === 'object'
             ? JSON.stringify(response.data, null, 2)
             : String(response.data);
-        res.render('ssrf', { title: 'URL Fetcher - SSRF Challenge', content: body });
+        res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: body });
     } catch (e) {
         const msg = e.code === 'ECONNABORTED' ? 'Request timed out.' : e.message;
-        res.render('ssrf', { title: 'URL Fetcher - SSRF Challenge', content: 'Error: ' + msg });
+        res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: 'Error: ' + msg });
     }
 });
 
@@ -463,7 +455,7 @@ router.get('/phantom-insider', async (req, res) => {
             { id: 13, label: 'Data Decryption', solved: !!(progress13 && progress13.solved_at) }
         ];
 
-        res.render('phantom-insider', { subFlags });
+        res.render('phantom-insider', { ...navCtx(req), subFlags });
     } catch (err) {
         console.error(err);
         res.status(500).render('error', {
