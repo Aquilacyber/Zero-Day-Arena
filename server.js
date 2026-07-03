@@ -7,6 +7,21 @@ const db = require('./database');
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
+
+// Bug fix: on Railway (and Heroku/Render/most PaaS), TLS is terminated at
+// the platform's edge proxy — the connection between that proxy and this
+// container is plain HTTP. Without `trust proxy`, Express's req.secure is
+// always false, so express-session refuses to set a `secure: true` cookie
+// at all (it thinks it would be sending a secure cookie over an insecure
+// connection). Net effect: login appears to succeed (redirect fires) but
+// no session cookie is ever stored, so the very next request looks
+// logged-out and bounces back to /auth/login. `trust proxy: 1` tells
+// Express to trust the X-Forwarded-Proto header from exactly one hop
+// upstream (the platform's own proxy), which is the correct, safe value
+// for single-proxy PaaS deployments like Railway.
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
 const PORT = process.env.PORT || 3000;
 
 // Config
@@ -140,6 +155,11 @@ app.get('/', requireAuth, async (req, res) => {
         res.render('index', {
             title: event.name,
             score: finalScore,
+            // Bug fix: previously the view back-derived the hint penalty as
+            // `solvedCount*100 - score`, which understates it once the real
+            // penalty exceeds solved points and score is floored at 0.
+            // Pass the real, unfloored penalty so the breakdown is accurate.
+            hintPenalty: totalPenalty,
             progress: progressPercent,
             solved: solved,              // array of solved challenge IDs (for buildChallengeCards)
             solvedCount: solved.length,  // scalar count for display in templates

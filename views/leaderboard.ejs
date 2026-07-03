@@ -14,9 +14,9 @@
 
 <%- include('partials/nav', {
     user: currentUser,
-    score: 0,
+    score: locals.score || 0,
     currentPage: 'leaderboard',
-    isAdmin: false
+    isAdmin: locals.isAdmin || false
 }) %>
 
 <div class="container">

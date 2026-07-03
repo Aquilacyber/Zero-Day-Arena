@@ -139,9 +139,9 @@
 <% if (locals.user) { %>
 <%- include('partials/nav', {
     user: locals.user || '',
-    score: 0,
+    score: locals.score || 0,
     currentPage: '',
-    isAdmin: false
+    isAdmin: locals.isAdmin || false
 }) %>
 <% } %>
 

@@ -289,7 +289,7 @@
 <body class="has-nav">
 <%- include('partials/nav', {
     user: adminUser,
-    score: 0,
+    score: locals.adminScore || 0,
     currentPage: 'admin',
     isAdmin: true
 }) %>
@@ -400,11 +400,11 @@
                                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                                     <% if (u.username !== adminUser) { %>
                                         <button class="action-btn warning"
-                                            onclick="resetUser(<%= u.id %>, '<%= u.username %>')">
+                                            data-action="reset-user" data-id="<%= u.id %>" data-name="<%= u.username %>">
                                             Reset
                                         </button>
                                         <button class="action-btn danger"
-                                            onclick="deleteUser(<%= u.id %>, '<%= u.username %>')">
+                                            data-action="delete-user" data-id="<%= u.id %>" data-name="<%= u.username %>">
                                             Delete
                                         </button>
                                     <% } else { %>
@@ -451,7 +451,7 @@
                             <td style="color:var(--text-secondary);"><%= t.captain %></td>
                             <td style="font-family:var(--font-mono); color:var(--text-secondary);"><%= t.memberCount %></td>
                             <td>
-                                <button class="action-btn danger" onclick="deleteTeam(<%= t.id %>, '<%= t.name %>')">Delete</button>
+                                <button class="action-btn danger" data-action="delete-team" data-id="<%= t.id %>" data-name="<%= t.name %>">Delete</button>
                             </td>
                         </tr>
                     <% }); %>
@@ -636,6 +636,25 @@
 <div id="toast"></div>
 
 <script>
+// ── Delegated click handler for row actions ──────────────────────
+// Bug fix: these used to be inline onclick="fn(...)" handlers built by
+// splicing EJS template values directly into a JS string literal.
+// Team names have no character restriction (unlike usernames), so a
+// team named e.g. x');fetch(...)// would decode out of the HTML-escaped
+// attribute and execute arbitrary JS in the admin's authenticated
+// session the moment this tab was opened — a stored XSS reachable by
+// any registered player. Reading values via .dataset instead of
+// building an inline JS string closes this off entirely, regardless
+// of what characters end up in a name.
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const { action, id, name } = btn.dataset;
+    if (action === 'reset-user')  resetUser(Number(id), name);
+    if (action === 'delete-user') deleteUser(Number(id), name);
+    if (action === 'delete-team') deleteTeam(Number(id), name);
+});
+
 // ── Tab switching ──────────────────────────────────────────────
 function switchTab(name, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));

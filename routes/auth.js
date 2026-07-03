@@ -10,6 +10,12 @@ const PASSWORD_MIN = 6;
 const PASSWORD_MAX = 72;
 const USERNAME_REGEX = /^[a-zA-Z0-9_\-]+$/;
 const TEAM_NAME_MAX = 32;
+// Bug fix: team names previously had no character restriction (only a
+// length cap), unlike usernames. Team names are rendered into an inline
+// onclick handler in the admin panel, so unrestricted characters allowed
+// stored XSS reaching an admin's session. Restrict to the same safe set
+// as usernames, plus spaces, so team names still feel natural.
+const TEAM_NAME_REGEX = /^[a-zA-Z0-9_\- ]+$/;
 
 const redirectIfAuth = (req, res, next) => {
     if (req.session.userId) return res.redirect('/');
@@ -50,6 +56,8 @@ router.post('/register', redirectIfAuth, async (req, res) => {
         return fail('Please enter a team name.');
     if (teamAction === 'create' && teamName.length > TEAM_NAME_MAX)
         return fail(`Team name must be ${TEAM_NAME_MAX} characters or fewer.`);
+    if (teamAction === 'create' && !TEAM_NAME_REGEX.test(teamName))
+        return fail('Team name may only contain letters, numbers, spaces, underscores, and hyphens.');
     if (teamAction === 'join' && !teamCode)
         return fail('Please enter a team code.');
 

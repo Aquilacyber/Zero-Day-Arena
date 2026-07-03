@@ -92,7 +92,7 @@
                             <span>Solves (<%= solvedCount %>×100)</span>
                             <span class="sb-positive">+<%= solvedCount * 100 %></span>
                         </div>
-                        <% const hintsTotal = Math.max(0, solvedCount * 100 - score); %>
+                        <% const hintsTotal = locals.hintPenalty || 0; %>
                         <% if (hintsTotal > 0) { %>
                         <div class="sb-row">
                             <span>Hint penalty</span>
@@ -426,12 +426,21 @@
                 flagInput.value = '';
                 flagMessage.style.display = 'none';
 
-                // Update nav score live
+                // Update nav score live.
+                // Bug fix: `data.newScore` is falsy when it's exactly 0 (e.g.
+                // hint penalties fully offset the new solve), so the old
+                // `if (navScore && data.newScore)` check silently skipped the
+                // update in that case. Check for undefined instead.
                 const navScore = document.getElementById('navScore');
-                if (navScore && data.newScore) navScore.textContent = data.newScore + ' pts';
+                if (navScore && data.newScore !== undefined) navScore.textContent = data.newScore + ' pts';
 
                 setTimeout(() => {
-                    if (data.newScore >= <%= totalChallenges * 100 %>) showCompletion();
+                    // Bug fix: this used to compare newScore to totalChallenges*100,
+                    // which is unreachable for anyone who ever used a hint (score
+                    // is penalty-adjusted and can never reach the max again). The
+                    // certificate should trigger on solving everything, regardless
+                    // of hint penalties — so compare solved count instead.
+                    if (data.newSolvedCount >= <%= totalChallenges %>) showCompletion();
                     else location.reload();
                 }, 1200);
             } else {

@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const { CHALLENGES, TOTAL_CHALLENGES, getChallengeName } = require('../config/challenges');
 const { getEventState, loadConfig, saveConfig, clearEventTiming } = require('../config/event');
+const { calcUserScore } = require('../lib/score');
 
 // Admin auth guard — must come before all routes
 router.use((req, res, next) => {
@@ -98,6 +99,7 @@ router.get('/', async (req, res) => {
                 captain: users.find(u => u.id === t.captain_id)?.username || '—'
             })),
             adminUser: req.session.username,
+            adminScore: await calcUserScore(req.session.userId),
             event
         });
     } catch (err) {

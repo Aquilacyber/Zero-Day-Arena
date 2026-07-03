@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { requireAuth } = require('../middleware/auth');
+const { calcUserScore } = require('../lib/score');
 
 // libxmljs removed for cross-platform compatibility
 
@@ -21,14 +22,18 @@ async function getFlag(challengeId) {
     return Buffer.from(row.flag, 'base64').toString('utf-8').trim();
 }
 
-// Inject session user info into every render so the nav partial has what it needs
-function navCtx(req) {
+// Inject session user info into every render so the nav partial has what it needs.
+// Bug fix: this used to hardcode score: 0, which meant the nav sidebar showed
+// "0 pts" on every single challenge page (only the dashboard route in
+// server.js computed the real score). Now it's async and pulls the real,
+// live score from the same calcUserScore() helper used everywhere else.
+async function navCtx(req) {
     return {
         // Use 'navUser' not 'user' — some challenge views (vault, profile) pass
         // their own 'user' object. Spreading as 'user' would overwrite it and crash.
         navUser: req.session.username || '',
         isAdmin: req.session.isAdmin  || false,
-        score:   0
+        score:   await calcUserScore(req.session.userId)
     };
 }
 
@@ -37,8 +42,8 @@ const SECRET_KEY = process.env.JWT_SECRET || 'super_secret_jwt_key';
 router.use(requireAuth);
 
 // Challenge 1: SQL Injection
-router.get('/login', (req, res) => {
-    res.render('login', { ...navCtx(req), error: null });
+router.get('/login', async (req, res) => {
+    res.render('login', { ...(await navCtx(req)), error: null });
 });
 
 router.post('/login', async (req, res) => {
@@ -53,12 +58,12 @@ router.post('/login', async (req, res) => {
         const row = rows[0];
         if (row) {
             const flag1 = await getFlag(1);
-            res.render('login', { ...navCtx(req), error: null, success: `Logged in! Flag: ${flag1}` });
+            res.render('login', { ...(await navCtx(req)), error: null, success: `Logged in! Flag: ${flag1}` });
         } else {
-            res.render('login', { ...navCtx(req), error: 'Invalid credentials' });
+            res.render('login', { ...(await navCtx(req)), error: 'Invalid credentials' });
         }
     } catch (err) {
-        res.render('login', { ...navCtx(req), error: 'Database error: ' + err.message });
+        res.render('login', { ...(await navCtx(req)), error: 'Database error: ' + err.message });
     }
 });
 
@@ -68,7 +73,7 @@ router.get('/search', async (req, res) => {
     // Inject the flag into a non-HttpOnly cookie so XSS payloads can steal it
     const flag2 = await getFlag(2);
     res.cookie('secret_flag', flag2, { httpOnly: false });
-    res.render('search', { ...navCtx(req), query });
+    res.render('search', { ...(await navCtx(req)), query });
 });
 
 // Challenge 3: IDOR
@@ -92,7 +97,7 @@ router.get('/profile', async (req, res) => {
             }
             // Mocking isAdmin for the view since we only selected username
             const userView = { ...row, isAdmin: row.username === 'admin' };
-            res.render('profile', { ...navCtx(req),  user: userView, flag });
+            res.render('profile', { ...(await navCtx(req)),  user: userView, flag });
         } else {
             res.status(404).render('error', {
                 statusCode: 404,
@@ -113,15 +118,15 @@ router.get('/profile', async (req, res) => {
 });
 
 // Challenge 4: Command Injection
-router.get('/ping', (req, res) => {
-    res.render('ping', { ...navCtx(req), output: null });
+router.get('/ping', async (req, res) => {
+    res.render('ping', { ...(await navCtx(req)), output: null });
 });
 
-router.post('/ping', (req, res) => {
+router.post('/ping', async (req, res) => {
     const ip = (req.body.ip || '').trim();
 
     if (!ip) {
-        return res.render('ping', { ...navCtx(req), output: 'Error: No target provided.' });
+        return res.render('ping', { ...(await navCtx(req)), output: 'Error: No target provided.' });
     }
 
     // ── Intentional WAF (Challenge 4 design notes) ──────────────────────────
@@ -156,7 +161,7 @@ router.post('/ping', (req, res) => {
 
     const isBlocked = wafBlacklist.some(rx => rx.test(ip));
     if (isBlocked) {
-        return res.render('ping', { ...navCtx(req), output: '[ WAF BLOCKED ] Restricted characters or filenames detected.\nHint: the WAF has gaps — think about what it does NOT check.' });
+        return res.render('ping', { ...(await navCtx(req)), output: '[ WAF BLOCKED ] Restricted characters or filenames detected.\nHint: the WAF has gaps — think about what it does NOT check.' });
     }
 
     const pingFlag = process.platform === 'win32' ? '-n' : '-c';
@@ -165,8 +170,8 @@ router.post('/ping', (req, res) => {
     exec(
         `ping ${pingFlag} 1 ${ip}`,
         { timeout: 10000, cwd: sandboxPath, shell: true },
-        (error, stdout, stderr) => {
-            res.render('ping', { ...navCtx(req), output: stdout || stderr || error?.message || 'No output.' });
+        async (error, stdout, stderr) => {
+            res.render('ping', { ...(await navCtx(req)), output: stdout || stderr || error?.message || 'No output.' });
         }
     );
 });
@@ -177,7 +182,7 @@ router.get('/vault', async (req, res) => {
     if (!req.cookies.token) {
         const token = jwt.sign({ username: req.session.username || 'guest', role: 'guest' }, SECRET_KEY);
         res.cookie('token', token);
-        return res.render('vault', { ...navCtx(req),  user: { username: req.session.username || 'guest', role: 'guest' }, flag: null });
+        return res.render('vault', { ...(await navCtx(req)),  user: { username: req.session.username || 'guest', role: 'guest' }, flag: null });
     }
 
     const token = req.cookies.token;
@@ -186,7 +191,7 @@ router.get('/vault', async (req, res) => {
 
         if (decoded && decoded.header.alg === 'none') {
             if (decoded.payload.role === 'admin') {
-                const flag5 = await getFlag(5); return res.render('vault', { ...navCtx(req),  user: decoded.payload, flag: flag5 });
+                const flag5 = await getFlag(5); return res.render('vault', { ...(await navCtx(req)),  user: decoded.payload, flag: flag5 });
             }
         }
 
@@ -199,33 +204,33 @@ router.get('/vault', async (req, res) => {
                     const base64UrlPayload = token.split('.')[1];
                     const payload = JSON.parse(Buffer.from(base64UrlPayload, 'base64').toString());
                     if (payload.role === 'admin') {
-                        return res.render('vault', { ...navCtx(req),  user: payload, flag: await getFlag(5) });
+                        return res.render('vault', { ...(await navCtx(req)),  user: payload, flag: await getFlag(5) });
                     }
-                    return res.render('vault', { ...navCtx(req),  user: payload, flag: null });
+                    return res.render('vault', { ...(await navCtx(req)),  user: payload, flag: null });
                 }
 
-                return res.render('vault', { ...navCtx(req),  user: { username: 'guest', role: 'guest' }, flag: null, error: 'Invalid Token Signature' });
+                return res.render('vault', { ...(await navCtx(req)),  user: { username: 'guest', role: 'guest' }, flag: null, error: 'Invalid Token Signature' });
             }
 
             if (user.role === 'admin') {
-                res.render('vault', { ...navCtx(req),  user, flag: await getFlag(5) });
+                res.render('vault', { ...(await navCtx(req)),  user, flag: await getFlag(5) });
             } else {
-                res.render('vault', { ...navCtx(req),  user, flag: null });
+                res.render('vault', { ...(await navCtx(req)),  user, flag: null });
             }
         });
     } catch (e) {
-        res.render('vault', { ...navCtx(req),  user: null, flag: null, error: 'Token Error' });
+        res.render('vault', { ...(await navCtx(req)),  user: null, flag: null, error: 'Token Error' });
     }
 });
 
 // Challenge 6: Calculator (RCE via eval)
-router.get('/calculator', (req, res) => {
-    res.render('calculator', { ...navCtx(req), title: 'Calculator - RCE Challenge', result: null });
+router.get('/calculator', async (req, res) => {
+    res.render('calculator', { ...(await navCtx(req)), title: 'Calculator - RCE Challenge', result: null });
 });
 
 const vm = require('vm');
 
-router.post('/calculator', (req, res) => {
+router.post('/calculator', async (req, res) => {
     const expression = req.body.expression || '';
     let result;
     try {
@@ -256,14 +261,14 @@ router.post('/calculator', (req, res) => {
     } catch (e) {
         result = 'Error: ' + e.message;
     }
-    res.render('calculator', { ...navCtx(req), title: 'Calculator - RCE Challenge', result: result });
+    res.render('calculator', { ...(await navCtx(req)), title: 'Calculator - RCE Challenge', result: result });
 });
 
 // Challenge 7: CSRF (Settings Panel)
-router.get('/csrf', (req, res) => {
+router.get('/csrf', async (req, res) => {
     // Use session for settings in this challenge
     const settings = req.session.csrfSettings || { email: 'user@example.com', theme: 'dark' };
-    res.render('csrf', { ...navCtx(req), title: 'Settings Panel - CSRF Challenge', settings: settings, message: null });
+    res.render('csrf', { ...(await navCtx(req)), title: 'Settings Panel - CSRF Challenge', settings: settings, message: null });
 });
 
 router.all('/csrf/update', async (req, res) => {
@@ -286,10 +291,10 @@ router.all('/csrf/update', async (req, res) => {
     const isCsrf = (origin && !origin.includes(host)) || (!origin && referer && !referer.includes(host));
 
     if (isCsrf) {
-        return res.render('csrf', { ...navCtx(req), title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: `Settings updated! Flag: ${await getFlag(7)}` });
+        return res.render('csrf', { ...(await navCtx(req)), title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: `Settings updated! Flag: ${await getFlag(7)}` });
     }
 
-    res.render('csrf', { ...navCtx(req), title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: 'Settings updated successfully!' });
+    res.render('csrf', { ...(await navCtx(req)), title: 'Settings Panel - CSRF Challenge', settings: newSettings, message: 'Settings updated successfully!' });
 });
 
 // Challenge 8: File Upload
@@ -315,17 +320,17 @@ const storage = multer.diskStorage({
 // Bug fix 3: cap upload size at 5MB — prevents DoS via large file uploads
 const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-router.get('/upload', (req, res) => {
-    res.render('upload', { ...navCtx(req), title: 'File Manager - Upload Challenge', message: null });
+router.get('/upload', async (req, res) => {
+    res.render('upload', { ...(await navCtx(req)), title: 'File Manager - Upload Challenge', message: null });
 });
 
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', upload.single('file'), async (req, res) => {
     // VULNERABLE: No file type validation
     if (!req.file) {
-        return res.render('upload', { ...navCtx(req), title: 'File Manager - Upload Challenge', message: 'No file uploaded' });
+        return res.render('upload', { ...(await navCtx(req)), title: 'File Manager - Upload Challenge', message: 'No file uploaded' });
     }
 
-    res.render('upload', { ...navCtx(req), title: 'File Manager - Upload Challenge', message: `File uploaded: ${req.file.filename}. Access the directory listing at /challenge/uploads to verify.` });
+    res.render('upload', { ...(await navCtx(req)), title: 'File Manager - Upload Challenge', message: `File uploaded: ${req.file.filename}. Access the directory listing at /challenge/uploads to verify.` });
 });
 
 // Serve uploaded files with directory listing
@@ -334,18 +339,18 @@ router.get('/uploads', async (req, res) => {
     const files = fs.readdirSync(uploadDir).filter(f => f !== '.gitkeep');
     const flag8 = await getFlag(8);
     res.render('uploads', {
-        ...navCtx(req),
+        ...(await navCtx(req)),
         files,
         flag: flag8,
     });
 });
 
 // Challenge 9: XXE (XML Parser)
-router.get('/xxe', (req, res) => {
-    res.render('xxe', { ...navCtx(req), title: 'XML Parser - XXE Challenge', result: null });
+router.get('/xxe', async (req, res) => {
+    res.render('xxe', { ...(await navCtx(req)), title: 'XML Parser - XXE Challenge', result: null });
 });
 
-router.post('/xxe', (req, res) => {
+router.post('/xxe', async (req, res) => {
     let xml = req.body.xml || '';
 
     try {
@@ -403,15 +408,15 @@ router.post('/xxe', (req, res) => {
         
         const result = dataMatch ? dataMatch[1] : 'No data found';
 
-        res.render('xxe', { ...navCtx(req), title: 'XML Parser - XXE Challenge', result: result });
+        res.render('xxe', { ...(await navCtx(req)), title: 'XML Parser - XXE Challenge', result: result });
     } catch (e) {
-        res.render('xxe', { ...navCtx(req), title: 'XML Parser - XXE Challenge', result: 'Error: ' + e.message });
+        res.render('xxe', { ...(await navCtx(req)), title: 'XML Parser - XXE Challenge', result: 'Error: ' + e.message });
     }
 });
 
 // Challenge 10: SSRF (URL Fetcher)
-router.get('/ssrf', (req, res) => {
-    res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: null });
+router.get('/ssrf', async (req, res) => {
+    res.render('ssrf', { ...(await navCtx(req)), title: 'URL Fetcher - SSRF Challenge', content: null });
 });
 
 router.post('/ssrf', async (req, res) => {
@@ -419,7 +424,7 @@ router.post('/ssrf', async (req, res) => {
 
     // Bug fix 5: guard against empty URL before making any request
     if (!url) {
-        return res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: 'Error: No URL provided.' });
+        return res.render('ssrf', { ...(await navCtx(req)), title: 'URL Fetcher - SSRF Challenge', content: 'Error: No URL provided.' });
     }
 
     try {
@@ -434,10 +439,10 @@ router.post('/ssrf', async (req, res) => {
         const body = typeof response.data === 'object'
             ? JSON.stringify(response.data, null, 2)
             : String(response.data);
-        res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: body });
+        res.render('ssrf', { ...(await navCtx(req)), title: 'URL Fetcher - SSRF Challenge', content: body });
     } catch (e) {
         const msg = e.code === 'ECONNABORTED' ? 'Request timed out.' : e.message;
-        res.render('ssrf', { ...navCtx(req), title: 'URL Fetcher - SSRF Challenge', content: 'Error: ' + msg });
+        res.render('ssrf', { ...(await navCtx(req)), title: 'URL Fetcher - SSRF Challenge', content: 'Error: ' + msg });
     }
 });
 
@@ -455,7 +460,7 @@ router.get('/phantom-insider', async (req, res) => {
             { id: 13, label: 'Data Decryption', solved: !!(progress13 && progress13.solved_at) }
         ];
 
-        res.render('phantom-insider', { ...navCtx(req), subFlags });
+        res.render('phantom-insider', { ...(await navCtx(req)), subFlags });
     } catch (err) {
         console.error(err);
         res.status(500).render('error', {

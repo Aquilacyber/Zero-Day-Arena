@@ -11,6 +11,7 @@ const {
 } = require('../config/challenges');
 const { requireAuth } = require('../middleware/auth');
 const { getEventState } = require('../config/event');
+const { calcUserScore, calcUserSolvedCount } = require('../lib/score');
 
 router.use(requireAuth);
 
@@ -56,14 +57,10 @@ function bustFlagCache() { _flagMapCache = null; }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Score helpers
+// calcUserScore/calcUserSolvedCount now live in lib/score.js — shared with
+// routes/challenges.js and routes/admin.js so the nav sidebar score is
+// accurate on every page, not just the dashboard.
 // ─────────────────────────────────────────────────────────────────────────────
-async function calcUserScore(userId) {
-    const rows = await db.query('SELECT solved_at, hints_used FROM user_progress WHERE user_id = ?', [userId]);
-    const solved  = rows.filter(r => r.solved_at).length;
-    const penalty = rows.reduce((s, r) => s + (r.hints_used || 0) * 20, 0);
-    return Math.max(0, solved * 100 - penalty);
-}
-
 async function calcTeamScore(teamId) {
     if (!teamId) return 0;
     const members = await db.query('SELECT id FROM users WHERE team_id = ?', [teamId]);
@@ -185,6 +182,11 @@ router.post('/submit', submitLimiter, async (req, res) => {
         if (firstBlood) await recordFirstBlood(challengeId, userId, teamId);
 
         const newScore = await calcUserScore(userId);
+        // Bug fix: completion modal used to compare newScore to
+        // totalChallenges*100, which is unreachable for anyone who
+        // ever used a hint (score is penalty-adjusted). Return the
+        // actual solved count so the frontend can check that instead.
+        const newSolvedCount = await calcUserSolvedCount(userId);
 
         // Bug fix 2: avoid redundant full-table scan in calcTeamScore after submit.
         // Instead, fetch team member ids + their progress in two targeted queries.
@@ -211,6 +213,7 @@ router.post('/submit', submitLimiter, async (req, res) => {
             success: true,
             message: `${challengeName} completed!`,
             newScore,
+            newSolvedCount,
             newTeamScore,
             challengeId,
             challengeName,
@@ -385,7 +388,8 @@ router.get('/writeup/:id', async (req, res) => {
             challenge: { name: getChallengeName(challengeId), difficulty: getChallengeDifficulty(challengeId) },
             writeup,
             user:    req.session.username || '',
-            isAdmin: req.session.isAdmin  || false
+            isAdmin: req.session.isAdmin  || false,
+            score:   await calcUserScore(userId)
         });
     } catch (err) {
         console.error('[writeup]', err);
@@ -501,7 +505,8 @@ router.get('/leaderboard', async (req, res) => {
             hasTeams:      allTeams.length > 0,
             event,
             user:    req.session.username || '',
-            isAdmin: req.session.isAdmin  || false
+            isAdmin: req.session.isAdmin  || false,
+            score:   await calcUserScore(req.session.userId)
         });
     } catch (err) {
         console.error('[leaderboard]', err);
